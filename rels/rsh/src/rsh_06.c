@@ -931,7 +931,8 @@ static void ext_moamoa_main(void) {
                     hit = 1;
                 }
             } else if (ret == 3) {
-                angle = (wp->breathDir + wp->angle) * 0.5f;
+                angle = wp->breathDir + wp->angle;
+                angle *= 0.5f;
                 m->flags |= 0x84;
                 m->state = 48;
                 m->target = moamoa_zero_vec;
@@ -1034,7 +1035,8 @@ static void ext_moamoa_main(void) {
                 tx += s * (m->gravity * (f32)sin((f32)(i + gp->retraceCount) * 0.25f));
                 r = i + gp->retraceCount;
                 ty += m->speed * s;
-                tz += s * (-m->gravity * (f32)cos(r * 0.25f));
+                { f32 cv = (f32)cos(r * 0.25f);
+                tz += s * (-m->gravity * cv); }
                 pose->mtx[0][3] += (tx - pose->mtx[0][3]) / 15.0f;
                 pose->mtx[1][3] += (ty - pose->mtx[1][3]) / 15.0f;
                 pose->mtx[2][3] += (tz - pose->mtx[2][3]) / 15.0f;
@@ -1045,11 +1047,12 @@ static void ext_moamoa_main(void) {
                 f32 rad;
                 {
                 f32 a = wp->angle + randf(-45.0f, 45.0f);
-                rad = 6.2831855f * a / 360.0f;
+                rad = 6.2831855f;
+                rad = rad * a / 360.0f;
                 }
                 x = pose->mtx[0][3] + 15.0f * moa_sinx(rad);
-                y = pose->mtx[1][3];
                 d = wp->dist;
+                y = pose->mtx[1][3];
                 z = pose->mtx[2][3] - 15.0f * moa_cosx(rad);
                 moamoa_jump(pose, m, d < 100.0f ? m->state : 0, 0, x, y, z, randf(1.0f, 1.0f), randf(0.4f, 0.4f));
                 }
@@ -1122,7 +1125,7 @@ static void ext_moamoa_main(void) {
                 x5 = pose->mtx[0][3] + d * moa_sinx(rad);
                 z5 = pose->mtx[2][3] - d * moa_cosx(rad); }
                 { f32 k; f32 r1 = rand() / 32767.0f; ty = r1 * (k = 6.0f - 5.0f) + 5.0f; }
-                { f32 k; f32 r1 = rand() / 32767.0f; k = 0.3f - 0.2f; s = r1 * k + 0.2f; }
+                s = randf(0.2f, 0.3f);
                 if (!sndFlag) {
                     psndSFXOn_3D((const char*)0x6c3, &(( Vec){pose->mtx[0][3], pose->mtx[1][3], pose->mtx[2][3]})) ;
                     sndFlag = 1;

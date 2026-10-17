@@ -1066,12 +1066,12 @@ void DrawSubMenuCommonProcess(f32* x, f32* y, void* a, void* b, void* c, void* d
                 {
                     f32 px = ((Vec*)b)[i].x;
                     f32 py;
-                    ((Vec*)b)[i].x = intplGetValue(4, menu->field_48[i], 12, px, -60.0f);
+                    ((Vec*)b)[i].x = ((f32 (*)(s32, f32, f32, s32, s32))intplGetValue)(4, px, -60.0f, menu->field_48[i], 12);
                     py = ((Vec*)b)[i].y;
-                    ((Vec*)b)[i].y = intplGetValue(4, menu->field_48[i], 12, py, 55.0f);
+                    ((Vec*)b)[i].y = ((f32 (*)(s32, f32, f32, s32, s32))intplGetValue)(4, py, 55.0f, menu->field_48[i], 12);
                 }
                 PSMTXTrans(((Mtx*)a)[i], 20.0f + ((Vec*)b)[i].x, ((Vec*)b)[i].y, ((Vec*)b)[i].z);
-                ((f32*)c)[i] = intplGetValue(0, menu->field_48[i], 12, 0.0f, 360.0f);
+                ((f32*)c)[i] = ((f32 (*)(s32, f32, f32, s32, s32))intplGetValue)(0, 0.0f, 360.0f, menu->field_48[i], 12);
                 if (((f32*)c)[i] > 360.0f) {
                     ((f32*)c)[i] -= 360.0f;
                 }
@@ -1124,7 +1124,7 @@ void DrawSubMenuCommonProcess(f32* x, f32* y, void* a, void* b, void* c, void* d
                 menu->field_A4[i] &= ~1;
                 menu->field_114[i] = 0xFF;
                 if (menu->field_DC[i] >= 0 && i != 6) {
-                    s = intplGetValue(0, menu->field_DC[i], 12, 90.0f, 0.0f);
+                    s = ((f32 (*)(s32, f32, f32, s32, s32))intplGetValue)(0, 90.0f, 0.0f, menu->field_DC[i], 12);
                     menu->field_A4[i] |= 1;
                     PSMTXRotRad(((Mtx*)d)[i], 'y', 0.017453292f * s);
                 }
@@ -1154,7 +1154,7 @@ void DrawSubMenuCommonProcess(f32* x, f32* y, void* a, void* b, void* c, void* d
                 }
                 menu->field_A4[i] |= 1;
                 PSMTXIdentity(((Mtx*)d)[i]);
-                menu->field_98 = intplGetValue(4, menu->field_DC[i], steps, menu->field_9C, menu->field_A0);
+                menu->field_98 = ((f32 (*)(s32, f32, f32, s32, s32))intplGetValue)(4, menu->field_9C, menu->field_A0, menu->field_DC[i], steps);
                 menu->field_DC[i]++;
                 if (menu->field_DC[i] > steps) {
                     menu->field_C0[i] = 2;
@@ -1379,8 +1379,8 @@ void DrawMainMenu(BattleWork* wp_) {
             z[i] = 0.0f;
             break;
         case 4:
-            b = kakutable[cursor->unk8 - 3][menu->field_84[i]];
             c = kakutable[cursor->unk8 - 3][menu->field_48[i + 10]];
+            b = kakutable[cursor->unk8 - 3][menu->field_84[i]];
             if (0.0f == b) {
                 b = 360.0f;
             }
@@ -1431,10 +1431,10 @@ void DrawMainMenu(BattleWork* wp_) {
             pos[i].x += ox;
             pos[i].y += oy;
             pos[i].z = oy;
-            pos[i].x = intplGetValue(4, menu->field_48[i], 12, -60.0f, pos[i].x);
-            pos[i].y = intplGetValue(4, menu->field_48[i], 12, 55.0f, pos[i].y);
+            pos[i].x = ((f32 (*)(s32, f32, f32, s32, s32))intplGetValue)(4, -60.0f, pos[i].x, menu->field_48[i], 12);
+            pos[i].y = ((f32 (*)(s32, f32, f32, s32, s32))intplGetValue)(4, 55.0f, pos[i].y, menu->field_48[i], 12);
             PSMTXTrans(mtx[i], 20.0f + pos[i].x, pos[i].y, pos[i].z);
-            z[i] = intplGetValue(0, menu->field_48[i], 12, 360.0f, 0.0f);
+            z[i] = ((f32 (*)(s32, f32, f32, s32, s32))intplGetValue)(0, 360.0f, 0.0f, menu->field_48[i], 12);
             menu->field_48[i]++;
             if (menu->field_48[i] > 12) {
                 menu->field_34[i] = 3;

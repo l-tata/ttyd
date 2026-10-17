@@ -97,6 +97,7 @@ long double __strtold(int max_width, int (*ReadProc)(void*, int, int), void* Rea
         short s;
         unsigned long long u;
     } r;
+    int radix = *(unsigned char*)__lconv.decimal_point;
     unsigned char* buf = r.b;
     int exp_negative = 0;
     int hex_dig_count;
@@ -112,7 +113,6 @@ long double __strtold(int max_width, int (*ReadProc)(void*, int, int), void* Rea
     int exp_value = 0;
     int dec_exp = 0;
     short hex_exp = 0;
-    int radix = *(unsigned char*)__lconv.decimal_point;
     int inf_index;
     *overflow = 0;
     c = fetch();

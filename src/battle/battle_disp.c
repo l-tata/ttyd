@@ -301,7 +301,7 @@ void btlDispMain(void) {
 	s32 xlu;
 	BattleUnit* unit;
 	BattleUnitPart* part;
-	BattleWork* wp = _battleWorkPointer;
+	void* wv = (void*)_battleWorkPointer;
 	s32 i;
 	const char* poseName;
 	BattleUnit* target;
@@ -324,7 +324,7 @@ void btlDispMain(void) {
 		unit = BattleGetUnitPtr(_battleWorkPointer, i);
 		if (!unit) continue;
 		if (unit->currentKind == UNIT_SHELL_SHIELD && unit->work[2] != 0) {
-			target = BattleGetUnitPtr(wp, unit->work[0]);
+			target = BattleGetUnitPtr(((BattleWork*)wv), unit->work[0]);
 			if (target) {
 				if (target->attackEventId && evtCheckID(target->attackEventId)) {
 					if (!(UNF(target, u32, 0x2A8) & 4)) goto next;
@@ -333,7 +333,7 @@ void btlDispMain(void) {
 				BtlUnit_GetPos(unit, &pos.x, &pos.y, &pos.z);
 				BtlUnit_GetPos(target, &tpos.x, &tpos.y, &tpos.z);
 				tpos.z += 7.0f;
-				h = BattleGetFloorHeight(wp, tpos.x, tpos.y, tpos.z);
+				h = BattleGetFloorHeight(((BattleWork*)wv), tpos.x, tpos.y, tpos.z);
 				switch (unit->work[2]) {
 					case 2:
 						if (__fabs(pos.x - tpos.x) > 10.0) {
@@ -513,7 +513,7 @@ next:
 			if (!(unit->mAttributeFlags & 0x20000000) && !(part->attributes & 0x2000000)) {
 				BtlUnit_GetPartsWorldPos(part, &ppos.x, &ppos.y, &ppos.z);
 				spos = ppos;
-				if ((unit->flags & 0x10000) && (partner = BattleGetPartnerPtr(wp, unit)) != NULL) {
+				if ((unit->flags & 0x10000) && (partner = BattleGetPartnerPtr(((BattleWork*)wv), unit)) != NULL) {
 					BtlUnit_GetPos(partner, &vpos.x, &vpos.y, &vpos.z);
 					spos.x += vpos.x;
 					spos.y += vpos.y;
@@ -522,7 +522,7 @@ next:
 					spos.y *= 0.5f;
 					spos.z *= 0.5f;
 				}
-				spos.y = BattleGetFloorHeight(wp, spos.x, spos.y, spos.z); h = spos.y;
+				spos.y = BattleGetFloorHeight(((BattleWork*)wv), spos.x, spos.y, spos.z); h = spos.y;
 				if (ppos.y <= h) {
 					scale = 1.0f;
 				}
@@ -531,7 +531,8 @@ next:
 				}
 				if (scale > 1.0) scale = 1.0f;
 				if (scale < 0.1f) scale = 0.1f;
-				scale = scale * ((f32)PART_FIELD(part, s16, 0x1A2) * unit->mScale.x * part->mScale.x * unit->mSizeMultiplier) * part->field_0x78;
+				scale = scale * ((f32)PART_FIELD(part, s16, 0x1A2) * unit->mScale.x * part->mScale.x * unit->mSizeMultiplier) ;
+				scale = scale * part->field_0x78;
 				if ((unit->flags & 0x10000) && scale < 16.0f) scale = 16.0f;
 				if (scale < 10.0f) scale = 8.0f;
 				shadowEntry(spos.x, 10.0f + h, spos.z, scale);
@@ -553,17 +554,17 @@ next:
 				dispEntry(CAMERA_3D, 0.0f, 2, (DispCallback)btlUnitItemDisp, unit);
 			}
 		}
-		else if (BW_S32(wp, 0xEF4) & 0x20000) {
+		else if (BW_S32(((BattleWork*)wv), 0xEF4) & 0x20000) {
 			dispEntry(CAMERA_3D, 0.0f, 2, (DispCallback)btlUnitItemDisp2, unit);
 		}
 	}
 	BattleStockExpDisp();
 	BattleStageDisp();
-	BattleCommandDisplay(wp);
+	BattleCommandDisplay(((BattleWork*)wv));
 	BattleAudience_Disp();
 	BattleBreakSlot_Disp();
-	if (BW_S32(wp, 0xEF4) & 0x10000) BW_S32(wp, 0xEF4) &= ~0x10000;
-	if (BW_S32(wp, 0xEF4) & 0x20000) BW_S32(wp, 0xEF4) &= ~0x20000;
+	if (BW_S32(((BattleWork*)wv), 0xEF4) & 0x10000) BW_S32(((BattleWork*)wv), 0xEF4) &= ~0x10000;
+	if (BW_S32(((BattleWork*)wv), 0xEF4) & 0x20000) BW_S32(((BattleWork*)wv), 0xEF4) &= ~0x20000;
 }
 
 #define MTX_TRANS_NEG(m, v) PSMTXTrans(m, -(v).x, -(v).y, -(v).z)

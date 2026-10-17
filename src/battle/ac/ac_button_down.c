@@ -27,20 +27,21 @@ static u32 _button_table[7] = {0x100, 0x200, 0x400, 0x800, 0x40, 0x20, 0x10};
 static void actionCommandDisp(s32 unused, f32 x, f32 y);
 
 s32 battleAcMain_ButtonDown(BattleWork* work) {
-    unsigned int tmpi2;
+    s32 off;
     BattleActions* ac = &work->actionCommands;
-    BDWork* p = (BDWork*)((u8*)work + 0x1f4c);
     u8* disp = (u8*)work + 0x1f20;
     s32 i;
-    s32 off;
     s32 k;
     s32 allDone;
+    BDWork* p = (BDWork*)((u8*)work + 0x1f4c);
     s32 again;
     s32 flag = 0;
+    const char* sfx;
 
     if (*((u8*)ac->mAcUnit + 0x303)) {
         flag = 1;
     }
+    sfx = (0, "SFX_AC_BUTTON_PUSH1");
     do {
         again = 0;
         switch (ac->mAcState) {
@@ -69,8 +70,9 @@ s32 battleAcMain_ButtonDown(BattleWork* work) {
                             } else {
                                 s32 found = 0;
                                 u32 cand;
+                                s32 ok;
                                 while (!found) {
-                                    s32 j, ok;
+                                    s32 j;
                                     cand = _button_table[irand(4)];
                                     ok = 1;
                                     for (j = i - 1, k = j * 4; j >= 0; j--, k -= 4) {
@@ -89,8 +91,9 @@ s32 battleAcMain_ButtonDown(BattleWork* work) {
                         default: {
                             s32 found = 0;
                             u32 cand;
+                            s32 ok;
                             while (!found) {
-                                s32 j, ok;
+                                s32 j;
                                 cand = _button_table[irand(7)];
                                 ok = 1;
                                 for (j = i - 1, k = j * 4; j >= 0; j--, k -= 4) {
@@ -141,9 +144,8 @@ s32 battleAcMain_ButtonDown(BattleWork* work) {
                     break;
                 }
                 OUT = 0;
-                tmpi2 = (off = 0);
                 allDone = 1;
-                for (i = 0, tmpi2; i < *(s32*)((u8*)work + 0x1cd0); i++, off += 4) {
+                for (i = 0, off = 0; i < *(s32*)((u8*)work + 0x1cd0); i++, off += 4) {
                     if (BTNO(off)) {
                         if (PRSO(off)) {
                             OUT++;
@@ -176,7 +178,7 @@ s32 battleAcMain_ButtonDown(BattleWork* work) {
                     }
                 }
                 if (p->sndCount != OUT) {
-                    psndSFXOn("SFX_AC_BUTTON_PUSH1");
+                    psndSFXOn(sfx);
                     p->sndCount = OUT;
                 }
                 if (allDone) {
@@ -259,6 +261,7 @@ static void actionCommandDisp(s32 unused, f32 x, f32 y)
   BDWork *p = (BDWork *) (((u8 *) work) + 0x1f4c);
   s32 k;
   s32 end = ((*((s32 *) (((u8 *) work) + 0x1cd0))) * 3) + 2;
+  int size;
   s32 i;
   s32 count;
   s32 off;
@@ -277,7 +280,8 @@ static void actionCommandDisp(s32 unused, f32 x, f32 y)
     Vec pos2 = {0.0f, 0.0f, -2.0f};
     pos2.x = lx;
     pos2.y = by;
-    iconDispGx(&pos2, 16, 0x8e, 1.0f);
+    size = 16;
+    iconDispGx(&pos2, size, 0x8e, 1.0f);
     lx += 16.0f;
   }
 
@@ -306,9 +310,7 @@ static void actionCommandDisp(s32 unused, f32 x, f32 y)
   {
     count = *((s32 *) (((u8 *) work) + 0x1cd0));
   }
-  off = 0;
-  j = 0;
-  for (i = 0; i < count; i++, off += 0x30, j += 4)
+  for (i = 0, off = 0, j = 0; i < count; i++, off += 0x30, j += 4)
   {
     s32 a;
     s32 b;
@@ -367,14 +369,14 @@ static void actionCommandDisp(s32 unused, f32 x, f32 y)
       Vec pos4 = {0.0f, 0.0f, 0.0f};
       pos4.x = bx + ((f32) off);
       pos4.y = by;
-      ((void (*)(Vec *, s32, s32, f32)) iconDispGx)(&pos4, 16, a, 1.0f);
+      ((void (*)(Vec *, s32, s32, f32)) iconDispGx)(&pos4, size, a, 1.0f);
     }
     else
     {
       Vec pos5 = {0.0f, 0.0f, 0.0f};
       pos5.x = bx + ((f32) off);
       pos5.y = by;
-      ((void (*)(Vec *, s32, s32, f32)) iconDispGx)(&pos5, 16, b, 1.0f);
+      ((void (*)(Vec *, s32, s32, f32)) iconDispGx)(&pos5, size, b, 1.0f);
     }
   }
 

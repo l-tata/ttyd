@@ -206,25 +206,15 @@ void puniAnimationInit(s16** a, s16** b) {
     s32 i;
     s16* p;
     s16 v;
+    s32 k;
 
     for (i = 0; i < 10; i++) {
         s0->table[i] = a[i];
-        for (j = 0, p = a[i];; j++) {
-            v = p[j];
-            if (v == -1) {
-                s0->end[i] = v;
-                break;
-            }
-            if (v == -2) {
-                s0->end[i] = v;
-                break;
-            }
-        }
-        s0->count[i] = j;
+        puniAnimCount(a[i], &s0->count[i], &s0->end[i]);
         s1->table[i] = b[i];
-        j = 0;
-        for (p = b[i];; j++) {
-            v = p[j];
+        k = 0; j = 0;
+        for (p = b[i];; j++, k++) {
+            v = p[k];
             if (v == -1) {
                 s1->end[i] = v;
                 break;
@@ -913,68 +903,117 @@ void puniMapDataSet(s32 w, s32 h, void* src, f32 x, f32 z) {
     memcpy(Punimap->src, src, Punimap->size);
 }
 
-void puniMapFindbuff(Vec* pos) {
-    f32 px, pz;
-    s32 bx, bz;
-    s32 changed;
-    s32 lvl;
-    s32 i, n;
-    s32 idx;
-    if (Punimap->enabled) {
-        if (Punimap->x < pos->y || Punimap->z > pos->y) {
-            Punimap->unk1C = 0;
-        } else {
-            memcpy(Punimap->data, Punimap->src, Punimap->size);
-            Punimap->unk1C = 1;
-            px = pos->x;
-            pz = pos->z;
-            switch (Punigp->mapKind) {
-                case 0:
-                    break;
-                case 1:
-                    puniMapdata_MRI_06_getidx(px, pz, &bx, &bz);
-                    break;
-                case 2:
-                    puniMapdata_MRI_09_getidx(px, pz, &bx, &bz);
-                    break;
-                case 3:
-                    puniMapdata_MRI_16_getidx(px, pz, &bx, &bz);
-                    break;
-            }
-            idx = bx + Punimap->width * bz;
-            if (idx < 0) {
-                Punimap->unk1C = 0;
-            }
-            if (Punimap->unk1C) {
-                Punimap->data[idx] |= 1;
-                lvl = 1;
-                while (1) {
-                    u16 l = lvl;
-                    changed = 0;
-                    n = Punimap->width * Punimap->height;
-                    for (i = 0; i < n; i++) {
-                        u16* d = Punimap->data;
-                        u16 v = d[i];
-                        if (v != 0xFFFF && l == (v & 0xFFF)) {
-                            u16 h = v & 0xF000;
-                            u16* k0 = &d[i - Punimap->width];
-                            u16* k1 = &d[i + Punimap->width];
-                            u16* k2 = &d[i - 1];
-                            u16* k3 = &d[i + 1];
-#define CHK(k) if ((*k & 0xFF) == 0 && (*k & 0xFF) < l) { if (__abs((*k & 0xF000) - h) <= 0x1000) { *k |= (u16)(l + 1); changed = 1; } }
-                            CHK(k0)
-                            CHK(k1)
-                            CHK(k2)
-                            CHK(k3)
-#undef CHK
-                        }
-                    }
-                    if (!changed) break;
-                    lvl++;
-                }
-            }
-        }
+void puniMapFindbuff(Vec *pos)
+{
+  f32 px;
+  f32 pz;
+  s32 bx;
+  s32 bz;
+  s32 changed;
+  s32 i;
+  s32 n;
+  s32 idx;
+  if (Punimap->enabled)
+  {
+    if ((Punimap->x < pos->y) || (Punimap->z > pos->y))
+    {
+      Punimap->unk1C = 0;
     }
+    else
+    {
+      memcpy(Punimap->data, Punimap->src, Punimap->size);
+      Punimap->unk1C = 1;
+      px = pos->x;
+      pz = pos->z;
+      switch (Punigp->mapKind)
+      {
+        case 0:
+          break;
+
+        case 1:
+          puniMapdata_MRI_06_getidx(px, pz, &bx, &bz);
+          break;
+
+        case 2:
+          puniMapdata_MRI_09_getidx(px, pz, &bx, &bz);
+          break;
+
+        case 3:
+          puniMapdata_MRI_16_getidx(px, pz, &bx, &bz);
+          break;
+
+      }
+
+      idx = bx + (Punimap->width * bz);
+      if (idx < 0)
+      {
+        Punimap->unk1C = 0;
+      }
+      if (Punimap->unk1C)
+      {
+        Punimap->data[idx] |= 1;
+        n = 1;
+        while (1)
+        {
+          u16 l = n;
+          changed = 0;
+          n = Punimap->width * Punimap->height;
+          for (i = 0; i < n; i++)
+          {
+            u16 *d = Punimap->data;
+            u16 v = d[i];
+            if ((v != 0xFFFF) && (l == (v & 0xFFF)))
+            {
+              u16 h = v & 0xF000;
+              u16 *k0 = &d[i - Punimap->width];
+              u16 *k1 = &d[i + Punimap->width];
+              u16 *k2 = &d[i - 1];
+              u16 *k3 = &d[i + 1];
+              if ((((*k0) & 0xFF) == 0) && (((*k0) & 0xFF) < l))
+              {
+                if (__abs(((*k0) & 0xF000) - h) <= 0x1000)
+                {
+                  *k0 |= (u16) (l + 1);
+                  changed = 1;
+                }
+              }
+              if ((((*k1) & 0xFF) == 0) && (((*k1) & 0xFF) < l))
+              {
+                if (__abs(((*k1) & 0xF000) - h) <= 0x1000)
+                {
+                  *k1 |= (u16) (l + 1);
+                  changed = 1;
+                }
+              }
+              if ((((*k2) & 0xFF) == 0) && (((*k2) & 0xFF) < l))
+              {
+                if (__abs(((*k2) & 0xF000) - h) <= 0x1000)
+                {
+                  *k2 |= (u16) (l + 1);
+                  changed = 1;
+                }
+              }
+              if ((((*k3) & 0xFF) == 0) && (((*k3) & 0xFF) < l))
+              {
+                if (__abs(((*k3) & 0xF000) - h) <= 0x1000)
+                {
+                  *k3 |= (u16) (l + 1);
+                  changed = 1;
+                }
+              }
+            }
+          }
+
+          if (!changed)
+          {
+            break;
+          }
+          n++;
+        }
+
+      }
+    }
+  }
 }
 
 void puniTargetSearch(PuniData* p) {
@@ -1414,44 +1453,63 @@ int puniMoveAtari(PuniData* p, Vec* start, Vec* dir, int reflect, f32 dist) {
     return ret;
 }
 
-void unk_mri_000095f0(PuniData* p, Vec* start, Vec* dir, f32 dist) {
-    Vec pa;
-    Vec hit;
-    Vec diff;
-    Vec old;
-    f32 b1, b2, b3;
-    f32 c1, c2, c3;
-    f32 d;
-    f32 sx = start->x;
-    f32 sy, sz;
-    PF(p, 0x214) = NULL;
-    PF(p, 0x210) = NULL;
-    sy = start->y;
-    sz = start->z;
-    d = dist;
-    PF(p, 0x210) = hitCheckFilter(NULL, &pa.x, &pa.y, &pa.z, &d, &hit.x, &hit.y, &hit.z, sx, sy, sz, dir->x, dir->y, dir->z);
-    if (PF(p, 0x210) == NULL) {
-        PSVECAdd(&p->pos, &p->vel, &p->pos);
-    } else if (Punigp->unk328 != 18) {
-        old = p->pos;
-        *PV(p, 0x560) = hit;
-        PSVECAdd(&p->pos, &p->vel, &p->pos);
-        if (p->vel.y == 0.0f) {
-            hit.y = 0.0f;
-        }
-        PSVECNormalize(&hit, &hit);
-        { f32 dp = PSVECDotProduct(dir, &hit); PSVECScale(&hit, &hit, dp * -(dist - d) + 0.1f); }
-        PSVECAdd(&p->pos, &hit, &p->pos);
-        PSVECSubtract(&p->pos, &old, &diff);
-        d = PSVECMag(&diff);
-        if (d > 0.0f) {
-            PSVECNormalize(&diff, &diff);
-            PF(p, 0x214) = hitCheckFilter(NULL, &b1, &b2, &b3, &d, &c1, &c2, &c3, old.x, old.y + 1.0f, old.z, diff.x, diff.y, diff.z);
-            if (PF(p, 0x214) != NULL) {
-                p->pos = old;
-            }
-        }
+void unk_mri_000095f0(PuniData *p, Vec *start, Vec *dir, f32 dist)
+{
+  Vec pa;
+  Vec hit;
+  Vec diff;
+  Vec old;
+  f32 new_var;
+  f32 b1;
+  f32 b2;
+  f32 b3;
+  f32 c1;
+  f32 c2;
+  f32 c3;
+  f32 d;
+  f32 sx;
+  f32 sy;
+  f32 sz;
+  *((void **) (((u8 *) p) + 0x214)) = (void *) 0;
+  *((void **) (((u8 *) p) + 0x210)) = (void *) 0;
+  sz = start->z;
+  sx = start->x;
+  new_var = dir->y;
+  sy = start->y;
+  d = dist;
+  *((void **) (((u8 *) p) + 0x210)) = hitCheckFilter((void *) 0, &pa.x, &pa.y, &pa.z, &d, &hit.x, &hit.y, &hit.z, sx, sy, sz, dir->x, new_var, dir->z);
+  if ((*((void **) (((u8 *) p) + 0x210))) == ((void *) 0))
+  {
+    PSVECAdd(&p->pos, &p->vel, &p->pos);
+  }
+  else
+    if (Punigp->unk328 != 18)
+  {
+    old = p->pos;
+    *((Vec *) (((u8 *) p) + 0x560)) = hit;
+    PSVECAdd(&p->pos, &p->vel, &p->pos);
+    if (p->vel.y == 0.0f)
+    {
+      hit.y = 0.0f;
     }
+    PSVECNormalize(&hit, &hit);
+    {
+      f32 dp = PSVECDotProduct(dir, &hit);
+      PSVECScale(&hit, &hit, (dp * (-(dist - d))) + 0.1f);
+    }
+    PSVECAdd(&p->pos, &hit, &p->pos);
+    PSVECSubtract(&p->pos, &old, &diff);
+    d = PSVECMag(&diff);
+    if (d > 0.0f)
+    {
+      PSVECNormalize(&diff, &diff);
+      *((void **) (((u8 *) p) + 0x214)) = hitCheckFilter((void *) 0, &b1, &b2, &b3, &d, &c1, &c2, &c3, old.x, old.y + 1.0f, old.z, diff.x, diff.y, diff.z);
+      if ((*((void **) (((u8 *) p) + 0x214))) != ((void *) 0))
+      {
+        p->pos = old;
+      }
+    }
+  }
 }
 
 void unk_mri_0000980c(PuniData* p, Vec* start, Vec* dir, f32 dist) {
@@ -1822,53 +1880,11 @@ PuniData* puniSearchRandom(s32 start, s32 count) {
 }
 
 PuniData* puniSearchRandom_Mikata(void) {
-    s32 idx = qrnd(101) + 1;
-    s32 i;
-    PuniData* p;
-    u32 f;
-
-    for (i = 0; ; i++) {
-        if (i == 102) {
-            return NULL;
-        }
-        if (idx == 103) {
-            idx = 1;
-        }
-        p = &Punidat[idx];
-        f = p->unk4;
-        if ((f & 0x400) && !(f & 0x4000)) {
-            return p;
-        }
-        idx++;
-    }
-}
-
-void fn_19_A820(void) {
+    return puniSearchRandom(1, 102);
 }
 
 PuniData* puniSearchRandom_Teki(void) {
-    s32 idx = qrnd(99) + 110;
-    s32 i;
-    PuniData* p;
-    u32 f;
-
-    for (i = 0; ; i++) {
-        if (i == 100) {
-            return NULL;
-        }
-        if (idx == 210) {
-            idx = 110;
-        }
-        p = &Punidat[idx];
-        f = p->unk4;
-        if ((f & 0x400) && !(f & 0x4000)) {
-            return p;
-        }
-        idx++;
-    }
-}
-
-void fn_19_A8DC(void) {
+    return puniSearchRandom(110, 100);
 }
 
 PuniData* searchBattle(PuniData* self, s32 start, s32 count, f32 maxDist) {
@@ -3352,119 +3368,147 @@ void puniModePreupdraft(PuniData* p) {
 }
 
 
-void puniModeUpdraft(PuniData* p) {
-    MarioWork* mario = marioGetPtr();
-    Vec d;
-    Vec save;
-    Vec savev;
-    Vec dir;
-    f32 mag;
-    f32 fx, fz;
-    s32 a, b;
-    s32 t;
-
-    if (p->unk114 == 0) {
-        {
-            Vec v_ = {0.0f, 0.94f, 0.0f};
-            p->vel = v_;
-        }
-    } else {
-        {
-            Vec v_ = {0.0f, 0.66f, 0.0f};
-            p->vel = v_;
-        }
-    }
-    if ((gp->retraceCount & 0x1F) == 0) {
-        psndSFXOn_3D("SFX_STG2_SOAPBALL_MOVE1", &p->pos);
-    }
-    t = (gp->retraceCount + *(s16*)&p->unk116[0]) & 0xF;
-    if (t > 7) {
-        t = 4 - (t & 7);
-    } else {
-        t = t - 3;
-    }
-    WF(p, 0x144) = 0.5f * (f32)t;
-    switch (p->unk114) {
-    case 0:
-        if (p->unk1A0 > 10.0f) {
-            p->unk1DC = Punigp->unk360;
-            PSVECSubtract(&p->pos, &mario->position, &d);
-            mag = PSVECMag(&d);
-            if (0.0f != mag) {
-                PSVECNormalize(&d, &d);
-            }
-            d.y = 0.0f;
-            d.z = 0.0f;
-            WF(p, 0x1F4) = 1.2f + p->unk1A0 / 100.0f;
-            p->unk1F8 = d;
-            WF(p, 0x1EC) = 0.0f;
-            WF(p, 0x1F0) = 0.0f;
-            p->unk114 = 1;
-        }
-        break;
-    case 1:
-        PSVECScale(&p->unk1F8, &d, WF(p, 0x1EC));
-        PSVECAdd(&p->vel, &d, &p->vel);
-        WF(p, 0x1EC) += WF(p, 0x1F0);
-        WF(p, 0x1F0) += 0.06f;
-        if (WF(p, 0x1EC) >= WF(p, 0x1F4)) {
-            WF(p, 0x1EC) = WF(p, 0x1F4);
-        }
-        break;
-    case 2:
-        PSVECScale(&p->unk1F8, &d, WF(p, 0x1EC));
-        PSVECAdd(&p->vel, &d, &p->vel);
-        WF(p, 0x1EC) -= WF(p, 0x1F0);
-        WF(p, 0x1F0) += 0.03f;
-        if (WF(p, 0x1EC) < 0.0f) {
-            p->unk114 = 0;
-        }
-        break;
-    }
-    mag = PSVECMag(&p->vel);
-    if (0.0f != mag) {
-        PSVECNormalize(&p->vel, &d);
-    } else {
-        {
-            Vec v_ = {0.0f, 0.0f, 0.0f};
-            d = v_;
-        }
-    }
-    save = p->pos;
-    savev = p->vel;
-    ((PuniMoveAtariW)puniMoveAtari)(p, save, d, 1, mag);
+void puniModeUpdraft(PuniData *p)
+{
+  MarioWork *mario = marioGetPtr();
+  Vec d;
+  Vec save;
+  Vec savev;
+  Vec dir;
+  f32 mag;
+  f32 fx;
+  f32 fz;
+  s32 a;
+  s32 b;
+  s32 t;
+  if (p->unk114 == 0)
+  {
     {
-        Vec q = p->pos;
-        q.x = q.x + WF(p, 0x144);
-        ((f32*)FP(p, 0x218)[3])[1] = q.x;
-        q.y = q.y + 15.0f;
-        ((f32*)FP(p, 0x218)[3])[2] = q.y;
-        q.z = q.z + 3.0f;
-        ((f32*)FP(p, 0x218)[3])[3] = q.z;
-        if (FP(p, 0x210) != NULL || FP(p, 0x214) != NULL) {
-            s32 f = 0;
-            if (FP(p, 0x210) != NULL && (FP(p, 0x210)[1] & 4)) {
-                f = 1;
-            }
-            if (FP(p, 0x214) != NULL && (FP(p, 0x214)[1] & 4)) {
-                f = 1;
-            }
-            if (f == 0) {
-                p->unkC = 20;
-                p->unk114 = 0;
-                WF(p, 0x144) = 0.0f;
-            } else {
-                p->pos = save;
-                p->vel = savev;
-                PSVECAdd(&p->pos, &p->vel, &p->pos);
-            }
-        }
-        if (p->pos.y >= 0.0f) {
-            p->unkC = 20;
-            p->unk114 = 0;
-            WF(p, 0x144) = 0.0f;
-        }
+      Vec v_ = {0.0f, 0.94f, 0.0f};
+      p->vel = v_;
     }
+  }
+  else
+  {
+    {
+      Vec v_ = {0.0f, 0.66f, 0.0f};
+      p->vel = v_;
+    }
+  }
+  if ((gp->retraceCount & 0x1F) == 0)
+  {
+    psndSFXOn_3D("SFX_STG2_SOAPBALL_MOVE1", &p->pos);
+  }
+  t = (gp->retraceCount + (*((s16 *) (&p->unk116[0])))) & 0xF;
+  if (t > 7)
+  {
+    t = 4 - (t & 7);
+  }
+  else
+  {
+    t = t - 3;
+  }
+  *((f32 *) (((u8 *) p) + 0x144)) = 0.5f * ((f32) t);
+  switch (p->unk114)
+  {
+    case 0:
+      if (p->unk1A0 > 10.0f)
+    {
+      p->unk1DC = Punigp->unk360;
+      PSVECSubtract(&p->pos, &mario->position, &d);
+      mag = PSVECMag(&d);
+      if (0.0f != mag)
+      {
+        PSVECNormalize(&d, &d);
+      }
+      d.y = 0.0f;
+      d.z = 0.0f;
+      *((f32 *) (((u8 *) p) + 0x1F4)) = 1.2f + (p->unk1A0 / 100.0f);
+      p->unk1F8 = d;
+      *((f32 *) (((u8 *) p) + 0x1EC)) = 0.0f;
+      *((f32 *) (((u8 *) p) + 0x1F0)) = 0.0f;
+      p->unk114 = 1;
+    }
+      break;
+
+    case 1:
+      PSVECScale(&p->unk1F8, &d, *((f32 *) (((u8 *) p) + 0x1EC)));
+      PSVECAdd(&p->vel, &d, &p->vel);
+      *((f32 *) (((u8 *) p) + 0x1EC)) += *((f32 *) (((u8 *) p) + 0x1F0));
+      *((f32 *) (((u8 *) p) + 0x1F0)) += 0.06f;
+      if ((*((f32 *) (((u8 *) p) + 0x1EC))) >= (*((f32 *) (((u8 *) p) + 0x1F4))))
+    {
+      *((f32 *) (((u8 *) p) + 0x1EC)) = *((f32 *) (((u8 *) p) + 0x1F4));
+    }
+      break;
+
+    case 2:
+      PSVECScale(&p->unk1F8, &d, *((f32 *) (((u8 *) p) + 0x1EC)));
+      PSVECAdd(&p->vel, &d, &p->vel);
+      *((f32 *) (((u8 *) p) + 0x1EC)) -= *((f32 *) (((u8 *) p) + 0x1F0));
+      *((f32 *) (((u8 *) p) + 0x1F0)) += 0.03f;
+      if ((*((f32 *) (((u8 *) p) + 0x1EC))) < 0.0f)
+    {
+      p->unk114 = 0;
+    }
+      break;
+
+  }
+
+  mag = PSVECMag(&p->vel);
+  if (0.0f != mag)
+  {
+    PSVECNormalize(&p->vel, &d);
+  }
+  else
+  {
+    {
+      Vec v_ = {0.0f, 0.0f, 0.0f};
+      d = v_;
+    }
+  }
+  save = p->pos;
+  savev = p->vel;
+  ((PuniMoveAtariW) puniMoveAtari)(p, save, d, 1, mag);
+  {
+    Vec q = p->pos;
+    q.x = q.x + (*((f32 *) (((u8 *) p) + 0x144)));
+    ((f32 *) (*((s32 **) (((u8 *) p) + 0x218)))[3])[1] = q.x;
+    q.y += 15.0f;
+    ((f32 *) (*((s32 **) (((u8 *) p) + 0x218)))[3])[2] = q.y;
+    q.z = q.z + 3.0f;
+    ((f32 *) (*((s32 **) (((u8 *) p) + 0x218)))[3])[3] = q.z;
+    if (((*((s32 **) (((u8 *) p) + 0x210))) != ((void *) 0)) || ((*((s32 **) (((u8 *) p) + 0x214))) != ((void *) 0)))
+    {
+      s32 f = 0;
+      if (((*((s32 **) (((u8 *) p) + 0x210))) != ((void *) 0)) && ((*((s32 **) (((u8 *) p) + 0x210)))[1] & 4))
+      {
+        f = 1;
+      }
+      if (((*((s32 **) (((u8 *) p) + 0x214))) != ((void *) 0)) && ((*((s32 **) (((u8 *) p) + 0x214)))[1] & 4))
+      {
+        f = 1;
+      }
+      if (f == 0)
+      {
+        p->unkC = 20;
+        p->unk114 = 0;
+        *((f32 *) (((u8 *) p) + 0x144)) = 0.0f;
+      }
+      else
+      {
+        p->pos = save;
+        p->vel = savev;
+        PSVECAdd(&p->pos, &p->vel, &p->pos);
+      }
+    }
+    if (p->pos.y >= 0.0f)
+    {
+      p->unkC = 20;
+      p->unk114 = 0;
+      *((f32 *) (((u8 *) p) + 0x144)) = 0.0f;
+    }
+  }
 }
 
 void puniModeWonder(PuniData* p) {
@@ -5292,47 +5336,71 @@ USER_FUNC(evt_puni_mem_init) {
 }
 
 void puniAnimationInit2(void);
-USER_FUNC(evt_puni_init) {
-    s32* args = event->args;
-    s32 a = evtGetValue(event, args[0]);
-    PuniTexInfo* tex = Punitex;
-    s32 b = evtGetValue(event, args[1]);
-    s32 c = evtGetValue(event, args[2]);
-    s32 d = evtGetValue(event, args[3]);
-    s32 i, n;
-    s16* t;
-    PuniAnimSet* a0;
-    PuniAnimSet* a1;
+s32 evt_puni_init(EventEntry *event, BOOL isFirstCall)
+{
+  s32 *args = event->args;
+  s32 a = evtGetValue(event, args[0]);
+  PuniTexInfo *tex = Punitex;
+  s32 b = evtGetValue(event, args[1]);
+  s32 c = evtGetValue(event, args[2]);
+  s32 d = evtGetValue(event, args[3]);
+  s32 i;
+  s16 *t;
+  PuniAnimSet *a0;
+  PuniAnimSet *a1;
+  if (isFirstCall)
+  {
+    puniInit();
+    return 0;
+  }
+  a0 = &Punigp->anim[0];
+  a1 = &Punigp->anim[1];
+  for (i = 0; i < 10; i++)
+  {
+    s32 n;
+    a0->table[i] = (s16 *) puni_patern_table[i];
+    t = (s16 *) puni_patern_table[i];
+    for (n = 0;; n++)
+    {
+      s16 *e = &a0->end[i];
+      s16 v = t[n];
+      if (v == (-1))
+      {
+        *e = v;
+        break;
+      }
+      if (v == (-2))
+      {
+        *e = v;
+        break;
+      }
+    }
 
-    if (isFirstCall) {
-        puniInit();
-        return EVT_RETURN_BLOCK;
+    a0->count[i] = n;
+    a1->table[i] = (s16 *) toge_patern_table[i];
+    t = (s16 *) toge_patern_table[i];
+    for (n = 0;; n++)
+    {
+      s16 *e = &a1->end[i];
+      s16 v = t[n];
+      if (v == (-1))
+      {
+        *e = v;
+        break;
+      }
+      if (v == (-2))
+      {
+        *e = v;
+        break;
+      }
     }
-    a0 = &Punigp->anim[0];
-    a1 = &Punigp->anim[1];
-    for (i = 0; i < 10; i++) {
-        a0->table[i] = (s16*)puni_patern_table[i];
-        t = (s16*)puni_patern_table[i];
-        for (n = 0;; n++) {
-            s16* e = &a0->end[i];
-            s16 v = t[n];
-            if (v == -1) { *e = v; break; }
-            if (v == -2) { *e = v; break; }
-        }
-        a0->count[i] = n;
-        a1->table[i] = (s16*)toge_patern_table[i];
-        t = (s16*)toge_patern_table[i];
-        for (n = 0;; n++) {
-            s16* e = &a1->end[i];
-            s16 v = t[n];
-            if (v == -1) { *e = v; break; }
-            if (v == -2) { *e = v; break; }
-        }
-        a1->count[i] = n;
-    }
-    puniAnimationInit2();
-    puniEntry(a, (PunidrvTexInfo*)tex, (void*)b, (void*)c, (void*)d);
-    return EVT_RETURN_DONE;
+
+    a1->count[i] = n;
+  }
+
+  puniAnimationInit2();
+  puniEntry(a, (PunidrvTexInfo *) tex, (void *) b, (void *) c, (void *) d);
+  return 2;
 }
 
 USER_FUNC(evt_puni_set_yuka) {
@@ -5958,16 +6026,16 @@ void puniHagurePos(PuniData* p) {
 
 static const Vec exit_zero0 = {0.0f, 0.0f, 0.0f};
 static const Vec exit_zero1 = {0.0f, 0.0f, 0.0f};
-static inline void puni_exit_swset(s32 idx, s32 val, Vec pos) {
+static inline void puni_exit_swset(s32 idx, s32 val, Vec* pos) {
     u8 yh, xh;
     s32 off;
     s32 x;
     s32 y;
     s32 z;
     off = (idx - 1) * 7;
-    x = pos.x;
-    y = pos.y;
-    z = pos.z;
+    x = pos->x;
+    y = pos->y;
+    z = pos->z;
     xh = ((x & 0xFF00) >> 8) & 0xFFu;
     yh = (y & 0xFF00) >> 8;
     _swByteSet(off, val);
@@ -5978,108 +6046,151 @@ static inline void puni_exit_swset(s32 idx, s32 val, Vec pos) {
     _swByteSet(off + 5, z & 0xFF);
     _swByteSet(off + 6, (z & 0xFF00) >> 8);
 }
-#define EXIT_SWSET(idx, v, pv) puni_exit_swset((idx), (v), (pv))
+#define EXIT_SWSET(idx, v, pv) (pos = (pv), puni_exit_swset((idx), (v), &pos))
 
 #pragma push
 #pragma opt_dead_assignments off
 #pragma opt_lifetimes off
-USER_FUNC(evt_puni_exit) {
-    s32* args = event->args;
-    s32 a0 = evtGetValue(event, args[0]);
-    s32 a1;
-    const char* name;
-    f32 sx, sy, sz, ex, ey, ez;
-    s32 notMri00;
-    s32 i;
-    PuniData* p;
-    evtGetValue(event, args[1]);
-    a1 = evtGetValue(event, args[2]);
-    name = (const char*)evtGetValue(event, args[3]);
+s32 evt_puni_exit(EventEntry *event, BOOL isFirstCall)
+{
+  s32 *args = event->args;
+  s32 a0 = evtGetValue(event, args[0]);
+  s32 a1;
+  const char *name;
+  f32 sx;
+  f32 sy;
+  f32 sz;
+  f32 ex;
+  f32 ey;
+  f32 ez;
+  s32 notMri00;
+  s32 i;
+  PuniData *p;
+  Vec pos;
+  Vec pos2;
+  evtGetValue(event, args[1]);
+  a1 = evtGetValue(event, args[2]);
+  name = (const char *) evtGetValue(event, args[3]);
+  Punigp->unk43C = 5;
+  if (a0 == 2)
+  {
+    Punigp->unk324 &= ~0xF;
+    switch (a1)
+    {
+      case 6:
+        Punigp->unk324 |= 1;
+        break;
 
-    Punigp->unk43C = 5;
-    if (a0 == 2) {
-        Punigp->unk324 &= ~0xF;
-        switch (a1) {
-            case 6:
-                Punigp->unk324 |= 1;
-                break;
-            case 2:
-                Punigp->unk324 |= 2;
-                break;
-            case 8:
-                Punigp->unk324 |= 4;
-                break;
-            case 9:
-                Punigp->unk324 |= 8;
-                break;
-        }
+      case 2:
+        Punigp->unk324 |= 2;
+        break;
+
+      case 8:
+        Punigp->unk324 |= 4;
+        break;
+
+      case 9:
+        Punigp->unk324 |= 8;
+        break;
+
     }
-    if (name == NULL) {
-        Punigp->unk324 |= 0x10;
-    } else {
-        Punigp->unk324 &= ~0x10;
+
+  }
+  if (name == ((void *) 0))
+  {
+    Punigp->unk324 |= 0x10;
+  }
+  else
+  {
+    Punigp->unk324 &= ~0x10;
+  }
+  if (!(Punigp->unk324 & 8))
+  {
+    sx = bero_get_BeroSX();
+    sy = puni_init_posy(bero_get_BeroSY());
+    sz = bero_get_BeroSZ();
+    ex = bero_get_BeroEX();
+    ey = puni_init_posy(bero_get_BeroEY());
+    ez = bero_get_BeroEZ();
+  }
+  else
+  {
+    ex = (sx = bero_get_BeroSX());
+    sy = puni_init_posy(bero_get_BeroSY());
+    sz = bero_get_BeroSZ();
+    ey = sy;
+    ez = sz;
+    sz += 60.0f;
+  }
+  *((s32 *) (((u8 *) Punigp) + 0x47C)) = 2;
+  *((f32 *) (((u8 *) Punigp) + 0x480)) = sx;
+  *((f32 *) (((u8 *) Punigp) + 0x484)) = sy;
+  *((f32 *) (((u8 *) Punigp) + 0x488)) = sz;
+  *((f32 *) (((u8 *) Punigp) + 0x4B0)) = 100.0f;
+  *((f32 *) (((u8 *) Punigp) + 0x48C)) = ex;
+  *((f32 *) (((u8 *) Punigp) + 0x490)) = ey;
+  *((f32 *) (((u8 *) Punigp) + 0x494)) = ez;
+  *((f32 *) (((u8 *) Punigp) + 0x4B4)) = 100.0f;
+  if (name != ((void *) 0))
+  {
+    notMri00 = strcmp(name, "mri_00");
+  }
+  else
+  {
+    notMri00 = 1;
+  }
+  p = &Punidat[1];
+  for (i = 1; i <= 102; i++, p++)
+  {
+    if (!(p->unk4 & 0x400))
+    {
+      continue;
     }
-    if (!(Punigp->unk324 & 8)) {
-        sx = bero_get_BeroSX();
-        sy = puni_init_posy(bero_get_BeroSY());
-        sz = bero_get_BeroSZ();
-        ex = bero_get_BeroEX();
-        ey = puni_init_posy(bero_get_BeroEY());
-        ez = bero_get_BeroEZ();
-    } else {
-        sx = bero_get_BeroSX();
-        sy = puni_init_posy(bero_get_BeroSY());
-        sz = bero_get_BeroSZ();
-        ey = sy;
-        ex = sx;
-        ez = sz;
-        sz += 60.0f;
+    if (p->unk4 & 0x800000)
+    {
+      continue;
     }
-    *(s32*)((u8*)Punigp + 0x47C) = 2;
-    *(f32*)((u8*)Punigp + 0x480) = sx;
-    *(f32*)((u8*)Punigp + 0x484) = sy;
-    *(f32*)((u8*)Punigp + 0x488) = sz;
-    *(f32*)((u8*)Punigp + 0x4B0) = 100.0f;
-    *(f32*)((u8*)Punigp + 0x48C) = ex;
-    *(f32*)((u8*)Punigp + 0x490) = ey;
-    *(f32*)((u8*)Punigp + 0x494) = ez;
-    *(f32*)((u8*)Punigp + 0x4B4) = 100.0f;
-    if (name != NULL) {
-        notMri00 = strcmp(name, "mri_00");
-    } else {
-        notMri00 = 1;
+    if (p->unk4 & 0x8000)
+    {
+      if (name == ((void *) 0))
+      {
+        p->unk4 |= 0x40000000;
+      }
+      else
+      {
+        puniHagurePos(p);
+        pos = p->pos, puni_exit_swset(*((s16 *) (((u8 *) p) + 0x116)), (u8) Punigp->unk328, &pos);
+      }
     }
-    p = &Punidat[1];
-    for (i = 1; i <= 102; i++, p++) {
-        if (!(p->unk4 & 0x400)) continue;
-        if (p->unk4 & 0x800000) continue;
-        if (p->unk4 & 0x8000) {
-            if (name == NULL) {
-                p->unk4 |= 0x40000000;
-            } else {
-                puniHagurePos(p);
-                EXIT_SWSET(*(s16*)((u8*)p + 0x116), (u8)Punigp->unk328, p->pos);
-            }
-        } else {
-            EXIT_SWSET(*(s16*)((u8*)p + 0x116), 0, exit_zero0);
-            PuniDokuritsu(p);
-            if (notMri00 == 0) {
-                p->unkC = 14;
-                p->unk114 = 0;
-                p->anim = 0;
-            } else {
-                p->unkC = 26;
-                p->unk114 = 0;
-                p->anim = 2;
-            }
-        }
+    else
+    {
+      pos = exit_zero0, puni_exit_swset(*((s16 *) (((u8 *) p) + 0x116)), 0, &pos);
+      PuniDokuritsu(p);
+      if (notMri00 == 0)
+      {
+        p->unkC = 14;
+        p->unk114 = 0;
+        p->anim = 0;
+      }
+      else
+      {
+        p->unkC = 26;
+        p->unk114 = 0;
+        p->anim = 2;
+      }
     }
-    if (name != NULL && strcmp(name, "mri_00") == 0) {
-        for (i = 1; i <= 102; i++) {
-            EXIT_SWSET(i, 0, *(volatile Vec*)&exit_zero1);
-        }
+  }
+
+  if ((name != ((void *) 0)) && (strcmp(name, "mri_00") == 0))
+  {
+    for (i = 1; i <= 102; i++)
+    {
+      pos2 = *((volatile Vec *) (&exit_zero1));
+      puni_exit_swset(i, 0, &pos2);
     }
-    return EVT_RETURN_DONE;
+
+  }
+  return 2;
 }
 #pragma pop
 
@@ -6698,15 +6809,18 @@ static const Vec puni_save_zero = { 0.0f, 0.0f, 0.0f };
 #pragma push
 #pragma opt_dead_assignments off
 USER_FUNC(evt_puni_all_save) {
-    s32 i;
     PuniData* p = Punidat + 1;
+    Vec pos;
+    s32 i;
     for (i = 1; i <= 102; i++, p++) {
         if ((p->unk4 & 0x400) && !(p->unk4 & 0x800000)) {
             if (p->unk4 & 0x8000) {
                 puniHagurePos(p);
-                puni_exit_swset(*(s16*)((u8*)p + 0x116), (u8)Punigp->unk328, p->pos);
+                pos = p->pos;
+                puni_exit_swset(*(s16*)((u8*)p + 0x116), (u8)Punigp->unk328, &pos);
             } else {
-                puni_exit_swset(*(s16*)((u8*)p + 0x116), 0, puni_save_zero);
+                pos = puni_save_zero;
+                puni_exit_swset(*(s16*)((u8*)p + 0x116), 0, &pos);
             }
         }
     }
@@ -6752,35 +6866,62 @@ const char* npcGetTribeName(const char** name) {
 
 #define PIDERS_Y(n)                                           if (50.0 >= __fabs(v.y - Punigp->posY[n])) {                  found = TRUE;                                              v.y = Punigp->posY[n];                                 }
 
-USER_FUNC(puni_piders_check_func) {
-    NpcWork* work = npcGetWorkPtr();
-    s32 off;
-    NpcEntry* npc = work->entries;
-    s32 count = work->total;
-    s32 i;
-    for (off = 0x28, i = 0; i < 8; i++, off += 0x14) {
-        *(u32*)((u8*)Punigp + 0x374 + off) &= ~5;
+s32 puni_piders_check_func(EventEntry *event, BOOL isFirstCall)
+{
+  NpcWork *work = npcGetWorkPtr();
+  s32 new_var3[2];
+  int new_var;
+  NpcEntry *npc;
+  s32 count;
+  s32 i;
+  count = work->total;
+  npc = work->entries;
+  for (new_var3[1] = 0x28, i = 0; i < 8; i++, new_var3[1] += 0x14)
+  {
+    *((u32 *) ((((u8 *) Punigp) + 0x374) + new_var3[1])) &= ~5;
+  }
+
+  new_var3[1] = 0x28;
+  for (i = 0; i < count; i++, npc++)
+  {
+    if ((((npc->flags & 1) && (npc->flags & 2)) && (npc->tribe != ((void *) 0))) && (strcmp(npc->tribe->nameJp, "�p�C�_�[�X") == 0))
+    {
+      Vec v;
+      BOOL found = 0;
+      v = npc->position;
+      new_var = 1;
+      new_var3[0] = 50.0;
+      if (50.0 >= __fabs(v.y - Punigp->posY[0, 0]))
+      {
+        found = 1;
+        v.y = Punigp->posY[0];
+      }
+      if (new_var3[0] >= __fabs(v.y - Punigp->posY[1]))
+      {
+        found = 1;
+        v.y = Punigp->posY[new_var];
+      }
+      if (50.0 >= __fabs(v.y - Punigp->posY[2]))
+      {
+        found = new_var;
+        v.y = Punigp->posY[2];
+      }
+      if (50.0 >= __fabs(v.y - Punigp->posY[3]))
+      {
+        found = new_var;
+        v.y = Punigp->posY[3];
+      }
+      if (found)
+      {
+        PuniTarget *t = (PuniTarget *) ((((u8 *) Punigp) + 0x374) + new_var3[1]);
+        t->pos = v;
+        t->flags |= 5;
+      }
+      new_var3[1] += 0x14;
     }
-    off = 0x28;
-    for (i = 0; i < count; i++, npc++) {
-        if ((npc->flags & 1) && (npc->flags & 2) && npc->tribe != NULL
-            && strcmp(npc->tribe->nameJp, "\203p\203C\203_\201[\203X") == 0) {
-            Vec v;
-            BOOL found = FALSE;
-            v = npc->position;
-            PIDERS_Y(0)
-            PIDERS_Y(1)
-            PIDERS_Y(2)
-            PIDERS_Y(3)
-            if (found) {
-                PuniTarget* t = (PuniTarget*)((u8*)Punigp + 0x374 + off);
-                t->pos = v;
-                t->flags |= 5;
-                off += 0x14;
-            }
-        }
-    }
-    return EVT_RETURN_DONE;
+  }
+
+  return 2;
 }
 
 USER_FUNC(puni_disp_info_kassencheck) {

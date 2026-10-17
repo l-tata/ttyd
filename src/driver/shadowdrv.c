@@ -301,7 +301,7 @@ static inline void shadowBegin(ProjShadowWork* wp, BOOL depth) {
     GXGetScissor(&tmp_sci[0], &tmp_sci[1], &tmp_sci[2], &tmp_sci[3]);
     GXSetViewport(0.0f, 0.0f, size, size, 0.0f, 1.0f);
     GXSetScissor(1, 1, size - 2, size - 2);
-    cfg = &shadowConfig[wp->unk8];
+    cfg = (0, &shadowConfig[wp->unk8]);
     proj = wp->proj;
     pos = cfg->pos;
     C_MTXLookAt(wp->view, &pos, &cfg->up, &cfg->target);

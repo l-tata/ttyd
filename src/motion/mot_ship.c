@@ -1034,7 +1034,7 @@ void shipMove(void)
     if (tz > vz)
     {
       vz += ((1.0f + tz) - vz) * shipData[new_var];
-      if (vz >= max)
+      if (max <= vz)
       {
         vz = max;
       }
@@ -1115,6 +1115,7 @@ void shipMove(void)
   }
   *((f32 *) (((u8 *) m) + 0x18C)) = len;
 }
+void shipStrippedPool(f32* p) { p[0] = 15.0f; p[1] = 50.0f; p[2] = 30.30303f; p[3] = 180.0f; p[4] = 3.1415927f; }
 
 
 BOOL checkHarbor(Vec* out) {

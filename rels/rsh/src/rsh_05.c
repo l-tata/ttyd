@@ -896,7 +896,8 @@ static void ext_moamoa_main(void) {
                     hit = 1;
                 }
             } else if (ret == 3) {
-                x = (wp->breathDir + wp->angle) * 0.5f;
+                x = wp->breathDir + wp->angle;
+                x *= 0.5f;
                 moa->flags |= 0x84;
                 moa->state = 0x30;
                 moa->target = moamoa_zero_vec;
@@ -996,18 +997,20 @@ static void ext_moamoa_main(void) {
                 f32 rad;
                 {
                 f32 a = wp->angle + randf(-45.0f, 45.0f);
-                rad = 6.2831855f * a / 360.0f;
+                rad = 6.2831855f;
+                rad = rad * a / 360.0f;
                 }
                 x = pose->mtx[0][3] + 15.0f * moa_sinx(rad);
-                y = pose->mtx[1][3];
                 d = wp->dist;
+                y = pose->mtx[1][3];
                 z = pose->mtx[2][3] - 15.0f * moa_cosx(rad);
                 moamoa_jump(pose, moa, d < 100.0f ? moa->state : 0, 1, x, y, z, randf(1.0f, 1.0f), randf(0.4f, 0.4f));
                                 }
                 break;
             case 2:
-                a = wp->angle + randf(-45.0f, 45.0f);
-                a += 180.0f;
+                { f32 r;
+                r = wp->angle + randf(-45.0f, 45.0f);
+                a = r + 180.0f;
                 d = wp->dist;
                 {
                 f32 rad = 6.2831855f * a / 360.0f;
@@ -1015,7 +1018,7 @@ static void ext_moamoa_main(void) {
                 }
                 y = pose->mtx[1][3];
                 z = pose->mtx[2][3];
-                { f32 a2 = randf(0.4f, 0.4f); f32 a1 = 2.0f * randf(1.0f, 1.0f); a2 *= 2.0f; moamoa_jump(pose, moa, d < 100.0f ? moa->state : 0, 1, x, y, z, a1, a2); }
+                { f32 a2 = randf(0.4f, 0.4f); f32 a1 = 2.0f * randf(1.0f, 1.0f); a2 *= 2.0f; moamoa_jump(pose, moa, d < 100.0f ? moa->state : 0, 1, x, y, z, a1, a2); } }
                 break;
             case 3:
                 pose->mtx[1][3] += moa->vy;
@@ -1069,6 +1072,7 @@ static void ext_moamoa_main(void) {
                 }
                 break;
             case 47:
+                { f32 x;
                 a = rand() / 32767.0f;
                 d = rand() / 32767.0f;
                 rad = 6.2831855f * (a * (225.0f - 135.0f) + 135.0f) / 360.0f;
@@ -1081,7 +1085,7 @@ static void ext_moamoa_main(void) {
                     psndSFXOn_3D((const char*)0x6c3, &(Vec){pose->mtx[0][3], pose->mtx[1][3], pose->mtx[2][3]});
                     sfx = 1;
                 }
-                moamoa_jump(pose, moa, 0x31, 0, x, -100.0f, z, a, s);
+                moamoa_jump(pose, moa, 0x31, 0, x, -100.0f, z, a, s); }
                 break;
             case 48:
                 if (--moa->jumpTimer > 0) {
@@ -1131,7 +1135,8 @@ static void ext_moamoa_main(void) {
             case 27:
                 d = distABf(pose->mtx[0][3], pose->mtx[2][3], -275.0f, -100.0f);
                 { f32 r1 = rand() / 32767.0f;
-                a = angleABf(pose->mtx[0][3], pose->mtx[2][3], -275.0f, -100.0f) + (r1 * (45.0f - -45.0f) + -45.0f); }
+                a = angleABf(pose->mtx[0][3], pose->mtx[2][3], -275.0f, -100.0f);
+                a += r1 * (45.0f - -45.0f) + -45.0f; }
                 if (d > 6.0f && (y = pose->mtx[1][3]) < 60.0f) {
                     f32 rad = 6.2831855f * a / 360.0f;
                     x = pose->mtx[0][3] + 15.0f * moa_sinx(rad);

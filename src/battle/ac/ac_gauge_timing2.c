@@ -65,6 +65,7 @@ s32 battleAcMain_GaugeTiming2(BattleWork *work)
   const char *new_var[2];
   BOOL found;
   s32 i3;
+  s32 i4;
   GT2Work *gw = (GT2Work *) (((u8 *) (&work->actionCommands)) + 0x2BC);
   BOOL autoCommand = 0;
   GT2Disp *disp = (GT2Disp *) (((u8 *) (&work->actionCommands)) + 0x290);
@@ -212,22 +213,22 @@ s32 battleAcMain_GaugeTiming2(BattleWork *work)
       sfxNg = "SFX_AC_COMMAND_NG1";
       sfxOk = "SFX_AC_COMMAND_OK1\0";
       found = 0;
-      for (i3 = 0; i3 < ((GT2Params *) (&work->actionCommands))->count; i3++)
+      for (i4 = 0; i4 < ((GT2Params *) (&work->actionCommands))->count; i4++)
       {
-        if ((!gw->state[i3]) && (!found))
+        if ((!gw->state[i4]) && (!found))
         {
-          f64 d = __fabs(gw->cursor - gw->targets[i3]);
+          f64 d = __fabs(gw->cursor - gw->targets[i4]);
           if (d <= 6.0)
           {
-            if ((!doAuto) && gw->flag[i3])
+            if ((!doAuto) && gw->flag[i4])
             {
-              gw->state[i3] = -1;
+              gw->state[i4] = -1;
               psndSFXOn(sfxNg);
               found = 1;
             }
             else
             {
-              gw->state[i3] = 1;
+              gw->state[i4] = 1;
               work->actionCommands.outputParams[0]++;
               psndSFXOn(sfxOk);
               found = 1;
@@ -236,10 +237,10 @@ s32 battleAcMain_GaugeTiming2(BattleWork *work)
           else
             if (d < __fabs(gw->targets[1] - gw->targets[0]))
           {
-            gw->flag[i3] = 1;
-            if (i3 == (((GT2Params *) (&work->actionCommands))->count - 1))
+            gw->flag[i4] = 1;
+            if (i4 == (((GT2Params *) (&work->actionCommands))->count - 1))
             {
-              gw->state[i3] = -1;
+              gw->state[i4] = -1;
               psndSFXOn(sfxNg);
               found = 1;
             }

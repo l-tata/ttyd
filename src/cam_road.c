@@ -800,7 +800,8 @@ void calcCamRoad(CamRoadState* out, CamRoadState* prev, f32 a, f32 b, f32 c, f32
             m = grp->stripNum;
             strip = &((CamRoadStrip*)wp->map->f_f4)[grp->stripOfs];
             for (k = 0; k < m; k++, strip++) {
-                cnt = strip->num - 1;
+                cnt = strip->num;
+        cnt = cnt - 1;
                 idx = &((s32*)wp->map->f_100)[strip->idxOfs];
                 idxp = idx + 1;
                 for (l = 1; cnt > l; idxp++, l++) {

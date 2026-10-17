@@ -1904,31 +1904,33 @@ extern s32 _evt_majinai_coin_up_effect[];
 void marioChgMoveMotion(void);
 
 void fbatBattleMode(void) {
-    FieldBattleData* data = gp->fbatData;
-    NpcEntry* npc = data->target;
-    PouchData* pouch = pouchGetPtr();
-    MarioWork* mario = marioGetPtr();
     FieldBattleInfo* info;
     NpcWork* wp;
-    NpcEntry* entry;
     s32 i;
     s32 num;
+    EventEntry* evt;
     s32 result;
     s32 mult;
+    NpcEntry* cur;
     s32 stolen;
     BOOL skip;
     BOOL win;
-    EventEntry* evt;
     NpcBattleInfo* binfo;
-
-    npc->rotation.y = 0.0f;
+    FieldBattleData* data;
+    PouchData* pouch;
+    MarioWork* mario;
+    data = gp->fbatData;
+    cur = data->target;
+    pouch = pouchGetPtr();
+    mario = marioGetPtr();
+    cur->rotation.y = 0.0f;
     switch (FBAT_SUB(data)) {
         case 0:
             if (dbg_battleskip == 1) {
                 data->mode = 1;
                 break;
             }
-            if (!npc->battleInfo.groupSetup) {
+            if (!cur->battleInfo.groupSetup) {
                 data->mode = 1;
                 break;
             }
@@ -1936,21 +1938,21 @@ void fbatBattleMode(void) {
                 data->mode = 1;
                 break;
             }
-            if (!npc->deadEvent) {
+            if (!cur->deadEvent) {
                 data->mode = 1;
                 break;
             }
             data->target->field_140 &= 0xF00;
             evtStopID(data->target->regularEvtId);
             info = &data->info;
-            if (!(npc->battleInfo.field_4 & 0x10000000)) {
-                if (pouchEquipCheckBadge(0x142) && NPC_ENEMY_LEVEL(npc) < pouch->level) {
+            if (!(cur->battleInfo.field_4 & 0x10000000)) {
+                if (pouchEquipCheckBadge(0x142) && NPC_ENEMY_LEVEL(cur) < pouch->level) {
                     skip = TRUE;
                     win = TRUE;
                     goto skipped;
                 }
                 if (pouchEquipCheckBadge(0x141) && (FBAT_U32(data, 0x10) & 0x01FE0000) &&
-                    NPC_ENEMY_LEVEL(npc) < pouch->level) {
+                    NPC_ENEMY_LEVEL(cur) < pouch->level) {
                     skip = TRUE;
                     win = TRUE;
                     goto skipped;
@@ -2001,11 +2003,11 @@ void fbatBattleMode(void) {
                     marioKeyOff();
                     wp = npcGetWorkPtrInline();
                     num = wp->total;
-                    for (i = 0, entry = wp->entries; i < num; i++, entry++) {
-                        if (entry && (entry->flags & 2) && (entry->flags & 0x10000000)) {
-                            entry->jumpFlags |= 0x10000;
-                            evtStopID(entry->regularEvtId);
-                            animPoseSetLocalTimeRate(entry->poseId, 0.0f);
+                    for (i = 0, cur = wp->entries; i < num; i++, cur++) {
+                        if (cur && (cur->flags & 2) && (cur->flags & 0x10000000)) {
+                            cur->jumpFlags |= 0x10000;
+                            evtStopID(cur->regularEvtId);
+                            animPoseSetLocalTimeRate(cur->poseId, 0.0f);
                         }
                     }
                 } else {
@@ -2022,12 +2024,12 @@ void fbatBattleMode(void) {
                 FBAT_SUB(data) = 4;
                 wp = npcGetWorkPtrInline();
                 num = wp->total;
-                for (i = 0, entry = wp->entries; i < num; i++, entry++) {
-                    if (entry && (entry->flags & 2) && (entry->flags & 0x10000000) &&
-                        (entry->jumpFlags & 0x10000)) {
-                        entry->jumpFlags &= ~0x10000;
-                        evtStartID(entry->regularEvtId);
-                        animPoseSetLocalTimeRate(entry->poseId, 1.0f);
+                for (i = 0, cur = wp->entries; i < num; i++, cur++) {
+                            if (cur && (cur->flags & 2) && (cur->flags & 0x10000000) &&
+                        (cur->jumpFlags & 0x10000)) {
+                        cur->jumpFlags &= ~0x10000;
+                        evtStartID(cur->regularEvtId);
+                        animPoseSetLocalTimeRate(cur->poseId, 1.0f);
                     }
                 }
             }
@@ -2038,32 +2040,32 @@ void fbatBattleMode(void) {
                 info = &data->info;
                 result = BattleInformationGetResult(info);
                 stolen = FALSE;
-                if (npc->battleInfo.stolenItems[0]) {
+                if (cur->battleInfo.stolenItems[0]) {
                     stolen = TRUE;
-                } else if (npc->battleInfo.stolenItems[1]) {
+                } else if (cur->battleInfo.stolenItems[1]) {
                     stolen = TRUE;
-                } else if (npc->battleInfo.stolenItems[2]) {
+                } else if (cur->battleInfo.stolenItems[2]) {
                     stolen = TRUE;
-                } else if (npc->battleInfo.stolenItems[3]) {
+                } else if (cur->battleInfo.stolenItems[3]) {
                     stolen = TRUE;
-                } else if (npc->battleInfo.stolenItems[4]) {
+                } else if (cur->battleInfo.stolenItems[4]) {
                     stolen = TRUE;
-                } else if (npc->battleInfo.stolenItems[5]) {
+                } else if (cur->battleInfo.stolenItems[5]) {
                     stolen = TRUE;
-                } else if (npc->battleInfo.stolenItems[6]) {
+                } else if (cur->battleInfo.stolenItems[6]) {
                     stolen = TRUE;
-                } else if (npc->battleInfo.stolenItems[7]) {
+                } else if (cur->battleInfo.stolenItems[7]) {
                     stolen = TRUE;
                 }
                 data->mode = 1;
                 if (result == 1 || result == 2) {
                     mult = 1;
                     if (BattleInformationGetResult(info) == 1) {
-                        npc->btlCoinDropCount = info->field_0x14;
+                        cur->btlCoinDropCount = info->field_0x14;
                     } else if (result == 1) {
-                        npc->btlCoinDropCount = npc->field_316;
+                        cur->btlCoinDropCount = cur->field_316;
                     } else {
-                        npc->btlCoinDropCount = 0;
+                        cur->btlCoinDropCount = 0;
                         mult = 0;
                         goto apply;
                     }
@@ -2073,42 +2075,42 @@ void fbatBattleMode(void) {
                     if (pouchEquipCheckBadge(0x139)) {
                         mult += pouchEquipCheckBadge(0x139);
                     }
-                    if (npc->battleInfo.field_4 & 0x100) {
+                    if (cur->battleInfo.field_4 & 0x100) {
                         mult++;
                     }
                 apply:
-                    npc->btlCoinDropCount *= mult;
+                    cur->btlCoinDropCount *= mult;
                     if (!stolen) {
-                        npcGroupDead(npc, 0);
+                        curGroupDead(cur, 0);
                         break;
                     }
-                    if (npc->flags & 0x400) {
-                        npc->field_108 = 0;
+                    if (cur->flags & 0x400) {
+                        cur->field_108 = 0;
                     }
-                    npc->wFbatHitCheckRelated = 90;
-                    npc->field_140 &= ~0x100;
-                    npc->field_140 |= 0x10000000;
-                    if (npc->flags & 0x200) {
-                        animPoseSetAnim(npc->poseId, npc->currentAnim, 1);
+                    cur->wFbatHitCheckRelated = 90;
+                    cur->field_140 &= ~0x100;
+                    cur->field_140 |= 0x10000000;
+                    if (cur->flags & 0x200) {
+                        animPoseSetAnim(cur->poseId, cur->currentAnim, 1);
                     }
-                    binfo = &npc->battleInfo;
+                    binfo = &cur->battleInfo;
                     for (i = 0; i < 8; i++) {
                         if (binfo->recoveredItems[i]) {
                             itemFlagOn(itemEntry(NULL, binfo->recoveredItems[i], 11, -1, 0,
-                                                 npc->position.x, npc->position.y, npc->position.z),
+                                                 cur->position.x, cur->position.y, cur->position.z),
                                        0x100);
                             binfo->recoveredItems[i] = 0;
                         }
                     }
                 } else if (result == 4) {
-                    if (npc->flags & 0x400) {
-                        npc->field_108 = 0;
+                    if (cur->flags & 0x400) {
+                        cur->field_108 = 0;
                     }
-                    npc->field_140 |= 0x10000000;
+                    cur->field_140 |= 0x10000000;
                     marioSetMutekiTime(3000);
                     *(s16*)((u8*)mario + 0x2C0) = sysMsec2Frame(3000);
-                    if (npc->flags & 0x200) {
-                        animPoseSetAnim(npc->poseId, npc->currentAnim, 1);
+                    if (cur->flags & 0x200) {
+                        animPoseSetAnim(cur->poseId, cur->currentAnim, 1);
                     }
                 }
             }
@@ -2126,10 +2128,12 @@ void _npcDead(NpcEntry* npc, s32 reason) {
 }
 
 void _npcGroupDead(NpcEntry* entry, s32 reason) {
+    s32 new_var;
     int i;
 
+    new_var = reason;
     if (entry->next) {
-        _npcGroupDead(entry->next, reason);
+        _npcGroupDead(entry->next, new_var);
     }
     for (i = 0; i < 4; i++) {
         if (entry->slaves[i]) {
@@ -2213,9 +2217,9 @@ void* fbatHitCheck(u32 flags, void* a1) {
     MarioWork* mario;
     FbatHitResult res;
     f32 dist;
-    s32 total;
     s32 i;
     u32 soft;
+    s32 total;
     PartyEntry* party;
 
     mario = marioGetPtr();
@@ -3009,9 +3013,9 @@ void npcStrippedKoopaPool(f32* f, const char** p) {
 }
 
 void npcKoopaModeMain(void) {
+    u8* fb2;
     s32 fire, jump;
     MarioWork* mario;
-    u8* fb2;
     fbatEncountCheck();
     fb2 = *(u8**)((u8*)gp + 0x168);
     mario = marioGetPtr();

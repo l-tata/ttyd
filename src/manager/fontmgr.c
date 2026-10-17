@@ -414,24 +414,7 @@ void FontDrawStringCenterMtx(Mtx mtx, const s8* msg) {
 		else {
 			code = JUTFont_CodeToGlyph(*msg++);
 		}
-		{
-			GXColor save;
-			if (fontEdge) {
-				save = fontColor;
-				FontDrawColorIDX(0);
-				_JUTFont_DrawPos(code, (s16)x - 2, 0);
-				_JUTFont_DrawPos(code, (s16)x + 2, 0);
-				{
-				s32 ix = (s16)x;
-				_JUTFont_DrawPos(code, ix, -2);
-				if (!code) {
-				}
-				_JUTFont_DrawPos(code, ix, 2);
-				}
-				FontDrawColor(save);
-			}
-			_JUTFont_DrawPos(code, x, 0);
-		}
+		fontDrawCodeEdgeXY(code, x, 0.0f);
 		x += fontGetWidth(code)->width + charspace[gp->language];
 	}
 }

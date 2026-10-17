@@ -577,13 +577,14 @@ void pouchSortItem(s32 mode) {
 	s32 n, i, j;
 	BOOL swap;
 	s16 t2, t1;
-	PouchData* pouch = mpp;
+	PouchData* pp[1];
 
+	pp[0] = mpp;
 	if ((u32)mode <= 1 || mode == 7 || mode == 8) {
 		n = 0;
 		for (j = 0; j < 20; j++) {
-			if (pouch->heldItems[j] != 0) {
-				items[n++] = pouch->heldItems[j];
+			if (pp[0]->heldItems[j] != 0) {
+				items[n++] = pp[0]->heldItems[j];
 			}
 		}
 		for (k = n; k < 20; k++) {
@@ -593,13 +594,13 @@ void pouchSortItem(s32 mode) {
 		else if (mode == 1) qqsort(items, n, 2, comp_kind);
 		else if (mode == 7) qqsort(items, n, 2, comp_aiueo_r);
 		else if (mode == 8) qqsort(items, n, 2, comp_kind_r);
-		memcpy(pouch->heldItems, items, sizeof(items));
+		memcpy(pp[0]->heldItems, items, sizeof(items));
 	}
 	if ((u32)(mode - 2) <= 1 || mode == 9 || mode == 10) {
 		n = 0;
 		for (j = 0; j < 121; j++) {
-			if (pouch->keyItems[j] != 0) {
-				keys[n++] = pouch->keyItems[j];
+			if (pp[0]->keyItems[j] != 0) {
+				keys[n++] = pp[0]->keyItems[j];
 			}
 		}
 		for (k = n; k < 121; k++) {
@@ -609,15 +610,15 @@ void pouchSortItem(s32 mode) {
 		else if (mode == 3) qqsort(keys, n, 2, comp_kind);
 		else if (mode == 9) qqsort(keys, n, 2, comp_aiueo_r);
 		else if (mode == 10) qqsort(keys, n, 2, comp_kind_r);
-		memcpy(pouch->keyItems, keys, sizeof(keys));
+		memcpy(pp[0]->keyItems, keys, sizeof(keys));
 	}
 	if ((u32)(mode - 4) <= 2 || (u32)(mode - 11) <= 1 || mode == 13) {
 		i = 0;
 		for (n = 0; n < 200; n++) {
-			if (pouch->badges[n] != 0) {
-				badges[i] = pouch->badges[n];
+			if (pp[0]->badges[n] != 0) {
+				badges[i] = pp[0]->badges[n];
 				i++;
-				equipped[i - 1] = pouch->equippedBadges[n];
+				equipped[i - 1] = pp[0]->equippedBadges[n];
 			}
 		}
 		for (n = i; n < 200; n++) {
@@ -658,8 +659,8 @@ void pouchSortItem(s32 mode) {
 				}
 			}
 		}
-		memcpy(pouch->badges, badges, sizeof(badges));
-		memcpy(pouch->equippedBadges, equipped, sizeof(equipped));
+		memcpy(pp[0]->badges, badges, sizeof(badges));
+		memcpy(pp[0]->equippedBadges, equipped, sizeof(equipped));
 	}
 }
 

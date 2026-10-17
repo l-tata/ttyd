@@ -195,9 +195,9 @@ void BattleStageMain(void) {
 		if (l->flags & 1) {
 			if (l->colorTime > 0) {
 				l->colorTime--;
-				l->color.r = intplGetValue(*(s8*)&l->colorMode, l->colorMax - l->colorTime, l->colorMax, l->colorStart.r, l->colorTarget.r);
-				l->color.g = intplGetValue(*(s8*)&l->colorMode, l->colorMax - l->colorTime, l->colorMax, l->colorStart.g, l->colorTarget.g);
-				l->color.b = intplGetValue(*(s8*)&l->colorMode, l->colorMax - l->colorTime, l->colorMax, l->colorStart.b, l->colorTarget.b);
+				l->color.r = ((f32 (*)(s32, f32, f32, s32, s32))intplGetValue)(*(s8*)&l->colorMode, l->colorStart.r, l->colorTarget.r, l->colorMax - l->colorTime, l->colorMax);
+				l->color.g = ((f32 (*)(s32, f32, f32, s32, s32))intplGetValue)(*(s8*)&l->colorMode, l->colorStart.g, l->colorTarget.g, l->colorMax - l->colorTime, l->colorMax);
+				l->color.b = ((f32 (*)(s32, f32, f32, s32, s32))intplGetValue)(*(s8*)&l->colorMode, l->colorStart.b, l->colorTarget.b, l->colorMax - l->colorTime, l->colorMax);
 				if ((l->flags & 2) && l->color.r == 0 && l->color.g == 0 && l->color.b == 0) {
 					l->flags = 0;
 					continue;
@@ -205,13 +205,13 @@ void BattleStageMain(void) {
 			}
 			if (l->widthTime > 0) {
 				l->widthTime--;
-				l->width = intplGetValue(*(s8*)&l->widthMode, l->widthMax - l->widthTime, l->widthMax, l->widthStart, l->widthTarget);
+				l->width = ((f32 (*)(s32, f32, f32, s32, s32))intplGetValue)(*(s8*)&l->widthMode, l->widthStart, l->widthTarget, l->widthMax - l->widthTime, l->widthMax);
 			}
 			if (l->posTime > 0) {
 				l->posTime--;
-				l->pos.x = intplGetValue(*(s8*)&l->posMode, l->posMax - l->posTime, l->posMax, l->posStart.x, l->posTarget.x);
-				l->pos.y = intplGetValue(*(s8*)&l->posMode, l->posMax - l->posTime, l->posMax, l->posStart.y, l->posTarget.y);
-				l->pos.z = intplGetValue(*(s8*)&l->posMode, l->posMax - l->posTime, l->posMax, l->posStart.z, l->posTarget.z);
+				l->pos.x = ((f32 (*)(s32, f32, f32, s32, s32))intplGetValue)(*(s8*)&l->posMode, l->posStart.x, l->posTarget.x, l->posMax - l->posTime, l->posMax);
+				l->pos.y = ((f32 (*)(s32, f32, f32, s32, s32))intplGetValue)(*(s8*)&l->posMode, l->posStart.y, l->posTarget.y, l->posMax - l->posTime, l->posMax);
+				l->pos.z = ((f32 (*)(s32, f32, f32, s32, s32))intplGetValue)(*(s8*)&l->posMode, l->posStart.z, l->posTarget.z, l->posMax - l->posTime, l->posMax);
 			}
 			if (l->flags & 4) {
 				sp = l->data;
@@ -229,9 +229,9 @@ void BattleStageMain(void) {
 			} else {
 				if (l->targetTime > 0) {
 					l->targetTime--;
-					l->target.x = intplGetValue(*(s8*)&l->targetMode, l->targetMax - l->targetTime, l->targetMax, l->targetStart.x, l->targetTarget.x);
-					l->target.y = intplGetValue(*(s8*)&l->targetMode, l->targetMax - l->targetTime, l->targetMax, l->targetStart.y, l->targetTarget.y);
-					l->target.z = intplGetValue(*(s8*)&l->targetMode, l->targetMax - l->targetTime, l->targetMax, l->targetStart.z, l->targetTarget.z);
+					l->target.x = ((f32 (*)(s32, f32, f32, s32, s32))intplGetValue)(*(s8*)&l->targetMode, l->targetStart.x, l->targetTarget.x, l->targetMax - l->targetTime, l->targetMax);
+					l->target.y = ((f32 (*)(s32, f32, f32, s32, s32))intplGetValue)(*(s8*)&l->targetMode, l->targetStart.y, l->targetTarget.y, l->targetMax - l->targetTime, l->targetMax);
+					l->target.z = ((f32 (*)(s32, f32, f32, s32, s32))intplGetValue)(*(s8*)&l->targetMode, l->targetStart.z, l->targetTarget.z, l->targetMax - l->targetTime, l->targetMax);
 				}
 				if (l->data != NULL) {
 					__memFree(HEAP_BATTLE, l->data);
@@ -240,9 +240,9 @@ void BattleStageMain(void) {
 			}
 			if (l->upTime > 0) {
 				l->upTime--;
-				l->up.x = intplGetValue(*(s8*)&l->upMode, l->upMax - l->upTime, l->upMax, l->upStart.x, l->upTarget.x);
-				l->up.y = intplGetValue(*(s8*)&l->upMode, l->upMax - l->upTime, l->upMax, l->upStart.y, l->upTarget.y);
-				l->up.z = intplGetValue(*(s8*)&l->upMode, l->upMax - l->upTime, l->upMax, l->upStart.z, l->upTarget.z);
+				l->up.x = ((f32 (*)(s32, f32, f32, s32, s32))intplGetValue)(*(s8*)&l->upMode, l->upStart.x, l->upTarget.x, l->upMax - l->upTime, l->upMax);
+				l->up.y = ((f32 (*)(s32, f32, f32, s32, s32))intplGetValue)(*(s8*)&l->upMode, l->upStart.y, l->upTarget.y, l->upMax - l->upTime, l->upMax);
+				l->up.z = ((f32 (*)(s32, f32, f32, s32, s32))intplGetValue)(*(s8*)&l->upMode, l->upStart.z, l->upTarget.z, l->upMax - l->upTime, l->upMax);
 			}
 		} else {
 			if (l->data != NULL) {
@@ -253,19 +253,19 @@ void BattleStageMain(void) {
 	}
 	if (s->stgDark.time > 0) {
 		s->stgDark.time--;
-		s->stgDark.cur = intplGetValue(*(s8*)&s->stgDark.mode, s->stgDark.max - s->stgDark.time, s->stgDark.max, s->stgDark.start, s->stgDark.target);
+		s->stgDark.cur = ((f32 (*)(s32, f32, f32, s32, s32))intplGetValue)(*(s8*)&s->stgDark.mode, s->stgDark.start, s->stgDark.target, s->stgDark.max - s->stgDark.time, s->stgDark.max);
 	}
 	if (s->stgDark.baseTime > 0) {
 		s->stgDark.baseTime--;
-		s->stgDark.base = intplGetValue(*(s8*)&s->stgDark.baseMode, s->stgDark.baseMax - s->stgDark.baseTime, s->stgDark.baseMax, s->stgDark.baseStart, s->stgDark.baseTarget);
+		s->stgDark.base = ((f32 (*)(s32, f32, f32, s32, s32))intplGetValue)(*(s8*)&s->stgDark.baseMode, s->stgDark.baseStart, s->stgDark.baseTarget, s->stgDark.baseMax - s->stgDark.baseTime, s->stgDark.baseMax);
 	}
 	if (s->audDark.time > 0) {
 		s->audDark.time--;
-		s->audDark.cur = intplGetValue(*(s8*)&s->audDark.mode, s->audDark.max - s->audDark.time, s->audDark.max, s->audDark.start, s->audDark.target);
+		s->audDark.cur = ((f32 (*)(s32, f32, f32, s32, s32))intplGetValue)(*(s8*)&s->audDark.mode, s->audDark.start, s->audDark.target, s->audDark.max - s->audDark.time, s->audDark.max);
 	}
 	if (s->audDark.baseTime > 0) {
 		s->audDark.baseTime--;
-		s->audDark.base = intplGetValue(*(s8*)&s->audDark.baseMode, s->audDark.baseMax - s->audDark.baseTime, s->audDark.baseMax, s->audDark.baseStart, s->audDark.baseTarget);
+		s->audDark.base = ((f32 (*)(s32, f32, f32, s32, s32))intplGetValue)(*(s8*)&s->audDark.baseMode, s->audDark.baseStart, s->audDark.baseTarget, s->audDark.baseMax - s->audDark.baseTime, s->audDark.baseMax);
 	}
 }
 
@@ -837,7 +837,8 @@ void tou_gamen_screen_tev(TevCbWork* p) {
 	Mtx m1;
 	Mtx m2;
 	u8* tex;
-	s32 i, j, n, w, s, k, row, col, idx;
+	s32 i, j, n, w, s, k, idx;
+	s32 rc[2];
 	u8 c;
 	f32 lim;
 	f32 x, y;
@@ -849,20 +850,20 @@ void tou_gamen_screen_tev(TevCbWork* p) {
 	if (screen_wp->field_24 != 0) {
 		tex = screen_wp->tex;
 		for (i = 0; i < 64; i++) {
-			row = i / 4;
-			col = i % 4;
+			rc[1] = i / 4;
+			rc[0] = i % 4;
 			for (j = 0; j < 64; j++) {
-				idx = (j / 8) * 32 + (row << 8); idx += j % 8; idx += col << 3; tex[idx] = (i & 1) ? 0xFF : 0;
+				idx = (j / 8) * 32 + (rc[1] << 8); idx += j % 8; idx += rc[0] << 3; tex[idx] = (i & 1) ? 0xFF : 0;
 			}
 			n = rand() % 100 + 100;
-			row = row * 256;
-			k = col * 8;
-			for (col = 0; col < n; col++) {
+			rc[1] = rc[1] * 256;
+			k = rc[0] * 8;
+			for (rc[0] = 0; rc[0] < n; rc[0]++) {
 				w = rand() % 4 + 2;
 				s = rand() % (65 - w);
 				c = rand() % 256;
 				for (j = s; j < s + w; j++) {
-					idx = j / 8 * 32; idx = idx + row; idx += j % 8; idx += k; tex[idx] = c;
+					idx = j / 8 * 32; idx = idx + rc[1]; idx += j % 8; idx += k; tex[idx] = c;
 				}
 			}
 		}

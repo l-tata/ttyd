@@ -172,12 +172,11 @@ BOOL partyPaperOn(PartyEntry* party, const char* animGroup) {
     }
     party->flags2 |= 0x4000000;
     party->paperPoseId = animPaperPoseEntry(animGroup, 2);
-    v4 = 0;
-    if (!strcmp(animGroup, "p_roll") || !strcmp(animGroup, "p_plane") || !strcmp(animGroup, "p_dokan_x") ||
-        !strcmp(animGroup, "p_dokan_y")) {
-        v4 = 1;
-    }
-    v5 = !v4;
+    v4 = (!strcmp(animGroup, "p_roll")
+        || !strcmp(animGroup, "p_plane")
+        || !strcmp(animGroup, "p_dokan_x")
+        || !strcmp(animGroup, "p_dokan_y"));
+    v5 = v4 == 0;
     if (!strcmp(animGroup, "p_slit")) {
         v5 = party->currentMemberId == PARTY_MEMBER_FLURRIE;
     }

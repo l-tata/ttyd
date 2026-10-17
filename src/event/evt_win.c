@@ -470,6 +470,7 @@ static inline s32 unitwin_party_icon(s32 icon) {
 }
 
 #define ICONGX ((void (*)(Vec*, u16, u16, f32))iconDispGx)
+#define ICONGX2 ((void (*)(Vec*, u16, f32, u16))iconDispGx)
 
 void evt_unitwin_disp_func(CameraId cameraId, void* param) {
 	PouchData* pouch = pouchGetPtr();
@@ -633,7 +634,7 @@ void evt_unitwin_disp_func(CameraId cameraId, void* param) {
 				s32 id = pouchKeepItem(i);
 				ItemData* item = &itemDataTable[id];
 				if (id) {
-					iconDispGx(&(Vec){11.0f, wp->scroll + (56 - row * 24), 0.0f}, 0x10, item->icon_id, 0.5f);
+					ICONGX2(&(Vec){11.0f, wp->scroll + (56 - row * 24), 0.0f}, 0x10, 0.5f, item->icon_id);
 					FontDrawStart();
 					FontDrawString(36.0f, wp->scroll + (80 - row * 24), item->id);
 					if (row == wp->cursor) {
@@ -668,7 +669,6 @@ void evt_unitwin_disp_func(CameraId cameraId, void* param) {
 			s32 flag;
 			u32 sl, st, sw, sh;
 
-			row = 0;
 			desc = NULL;
 			if (mode == 2 || mode == 3) {
 				h = (8 - pouchGetHaveItemCnt() > 0 ? 8 - pouchGetHaveItemCnt() : 0) * 24;
@@ -733,7 +733,7 @@ void evt_unitwin_disp_func(CameraId cameraId, void* param) {
 			}
 			GXGetScissor(&sl, &st, &sw, &sh);
 			GXSetScissor(0x120, 0xA2, 0x11C, 0xBE - h);
-			for (tbl = badge_bottakuru100_table, i = 0; i < max; i++) {
+			for (tbl = badge_bottakuru100_table, i = 0, row = i; i < max; i++) {
 				
 				GXColor color = {0x00, 0x00, 0x00, 0xFF};
 				s32 id;
@@ -788,7 +788,7 @@ void evt_unitwin_disp_func(CameraId cameraId, void* param) {
 						flag = 0x20;
 					}
 					{
-						ICONGX(&(Vec){11.0f, wp->scroll + (56 - row * 24), 0.0f}, flag | 0x10, item->icon_id, 0.5f);
+						ICONGX2(&(Vec){11.0f, wp->scroll + (56 - row * 24), 0.0f}, flag | 0x10, 0.5f, item->icon_id);
 					}
 					FontDrawStart();
 					FontDrawScale(0.8f);
@@ -998,7 +998,7 @@ void evt_unitwin_disp_func(CameraId cameraId, void* param) {
 						flag = 0x20;
 					}
 				}
-				ICONGX(&(Vec){11.0f, wp->scroll + (56 - row * 24), 0.0f}, flag | 0x10, unitwin_party_icon(party_icon_table[i]), 0.5f);
+				ICONGX2(&(Vec){11.0f, wp->scroll + (56 - row * 24), 0.0f}, flag | 0x10, 0.5f, unitwin_party_icon(party_icon_table[i]));
 				FontDrawStart();
 				FontDrawColor(color);
 				switch (i) {
@@ -1107,7 +1107,7 @@ void evt_unitwin_disp_func(CameraId cameraId, void* param) {
 				iy = 56 - i * 24;
 				iflag |= 0x10;
 				{
-					ICONGX(&(Vec){11.0f, wp->scroll + iy, 0.0f}, iflag, mario_status_icon_table[i], 0.5f);
+					ICONGX2(&(Vec){11.0f, wp->scroll + iy, 0.0f}, iflag, 0.5f, mario_status_icon_table[i]);
 				}
 				FontDrawStart();
 				FontDrawColor(color);
@@ -1130,10 +1130,10 @@ void evt_unitwin_disp_func(CameraId cameraId, void* param) {
 						bob = 0;
 					}
 					{
-						ICONGX(&(Vec){166.0f, bob + (wp->scroll + iy), 0.0f}, iflag, icon, 0.5f);
+						ICONGX2(&(Vec){166.0f, bob + (wp->scroll + iy), 0.0f}, iflag, 0.5f, icon);
 					}
 					{
-						ICONGX(&(Vec){186.0f, bob + (wp->scroll + iy), 0.0f}, iflag, icon, 0.5f);
+						ICONGX2(&(Vec){186.0f, bob + (wp->scroll + iy), 0.0f}, iflag, 0.5f, icon);
 					}
 				} else {
 					v = *mario_status_point_table[i] - mario_status_henka_table[i];
@@ -1144,7 +1144,7 @@ void evt_unitwin_disp_func(CameraId cameraId, void* param) {
 						bob = 0;
 					}
 					{
-						ICONGX(&(Vec){176.0f, (wp->scroll + iy) - bob, 0.0f}, iflag, icon, 0.5f);
+						ICONGX2(&(Vec){176.0f, (wp->scroll + iy) - bob, 0.0f}, iflag, 0.5f, icon);
 					}
 				}
 				if (v > 0) {
@@ -1212,7 +1212,7 @@ void evt_unitwin_disp_func(CameraId cameraId, void* param) {
 					j = 0x20;
 				}
 				{
-					ICONGX(&(Vec){11.0f, wp->scroll + (56 - i * 24), 0.0f}, j | 0x10, mario_status_icon_table[i], 0.5f);
+					ICONGX2(&(Vec){11.0f, wp->scroll + (56 - i * 24), 0.0f}, j | 0x10, 0.5f, mario_status_icon_table[i]);
 				}
 				FontDrawStart();
 				FontDrawColor(color);
@@ -1289,7 +1289,7 @@ void evt_unitwin_disp_func(CameraId cameraId, void* param) {
 					flag = 0x20;
 				}
 				{
-					ICONGX(&(Vec){11.0f, wp->scroll + (56 - row * 24), 0.0f}, flag | 0x10, mario_status_icon_table[i], 0.5f);
+					ICONGX2(&(Vec){11.0f, wp->scroll + (56 - row * 24), 0.0f}, flag | 0x10, 0.5f, mario_status_icon_table[i]);
 				}
 				FontDrawStart();
 				FontDrawColor(color);
@@ -1331,7 +1331,6 @@ void evt_unitwin_disp_func(CameraId cameraId, void* param) {
 		s32 lines;
 		s32 k;
 		s8* p;
-		s32 w;
 		s32 w2;
 
 		switch (wp->field_0x50) {
@@ -1392,24 +1391,24 @@ void evt_unitwin_disp_func(CameraId cameraId, void* param) {
 		}
 		windowDispGX_Waku_col(0, (GXColor){0xFF, 0xFF, 0xFF, 0xFF}, -280.0f, 100.0f, 240.0f, (lines - 1) * 24 + 45, 20.0f);
 		FontDrawStart();
-		w = line1 ? FontGetMessageWidth(line1) : 0;
+		k = line1 ? FontGetMessageWidth(line1) : 0;
 		if (line2) {
 			w2 = FontGetMessageWidth(line2);
 		} else {
 			w2 = 0;
 		}
-		if (w2 > w) {
-			w = w2;
+		if (w2 > k) {
+			k = w2;
 		}
-		if (w <= 228) {
-			w = (228 - w) / 2;
+		if (k <= 228) {
+			k = (228 - k) / 2;
 		} else {
-			FontDrawScale(228.0f / w);
-			w = 0;
+			FontDrawScale(228.0f / k);
+			k = 0;
 		}
-		FontDrawString(w - 274, 90.0f, line1);
+		FontDrawString(k - 274, 90.0f, line1);
 		if (line2) {
-			FontDrawString(w - 274, 66.0f, line2);
+			FontDrawString(k - 274, 66.0f, line2);
 		}
 		iconFlagOff("yubicursor_2", 2);
 		iconSetPos("yubicursor_2", wp->cursorX, wp->cursorY, 0.0f);

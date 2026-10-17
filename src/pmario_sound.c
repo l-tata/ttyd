@@ -5508,262 +5508,336 @@ BOOL unk_800d7270(u32 r3, char* bgm_name, u32 fadetime, s32 r6) {
 
 #pragma dont_inline on
 #define EB ((u8*)&entry->unkC)
-BOOL psndBGMOn_f_d(u32 flags, char* bgm_name, u32 fadetime, u32 fadeout, s32 r7) {
-	s32 idx;
-	u32 ch;
-	SoundBGMEntry* entry;
-	u8 pan;
-	u32 old;
-	s32 i;
-	PaperSoundFade* fade;
-	s32 id;
-	PaperSoundBGM* bgm;
-	u8 vol;
-	s32 sid;
+BOOL psndBGMOn_f_d(u32 flags, char *bgm_name, u32 fadetime, u32 fadeout, s32 r7)
+{
+  s32 idx;
+  u32 ch;
+  SoundBGMEntry *entry;
+  u8 pan;
+  u32 old;
+  s32 i;
+  PaperSoundFade *fade;
+  s32 id;
+  PaperSoundBGM *bgm;
+  u8 vol;
+  if (psnd.unk56 & 1)
+  {
+    return 0;
+  }
+  entry = psbgmlist;
+  if (((s32) bgm_name) >= 0)
+  {
+    i = (s32) bgm_name;
+  }
+  else
+  {
+    for (i = 0; i < 0x106; i++, entry++)
+    {
+      if (!strcmp(entry->name, bgm_name))
+      {
+        break;
+      }
+    }
 
-	if (psnd.unk56 & 1) {
-		return FALSE;
-	}
-	entry = psbgmlist;
-	if ((s32)bgm_name >= 0) {
-		i = (s32)bgm_name;
-	}
-	else {
-		for (i = 0; i < 0x106; i++, entry++) {
-			if (!strcmp(entry->name, bgm_name)) {
-				break;
-			}
-		}
-		if (i >= 0x106) {
-			i = 0;
-		}
-	}
-	idx = flags & 0xF;
-	id = i;
-	fade = &psbgm[flags & 0xF].fade;
-	if (evtGetValue(NULL, GSW(0)) >= 101 && (evtGetValue(NULL, GSW(0)) < 102 || evtGetValue(NULL, GSW(0)) >= 106)) {
-		if (strcmp(gp->currentMapName, "mri_00") && i == 0x4F) {
-			id = 0x50;
-		}
-	}
-	if (evtGetValue(NULL, GSW(0)) >= 257 && evtGetValue(NULL, GSW(0)) < 260) {
-		if (id == 0x5A || id == 0x5B) {
-			id = 0xA4;
-		}
-	}
-	if (evtGetValue(NULL, GSW(0)) >= 109 && evtGetValue(NULL, GSW(0)) < 111) {
-		PaperSoundBGM* b0;
-		if (id == 0x4F) {
-			id = 0xA4;
-		}
-		if (id == 0x50) {
-			id = 0xA4;
-		}
-		if (id == 0x7B) {
-			return FALSE;
-		}
-		if (id == 0x7D) {
-			return FALSE;
-		}
-		if (id == 0x7E) {
-			return FALSE;
-		}
-		if (idx == 0 && (flags & 0x20) && fade->state != 4) {
-			return FALSE;
-		}
-		b0 = psbgm;
-		if ((id == 0x90 || id == 0x91) && b0->unk0 == 0xA4) {
-			return FALSE;
-		}
-		if (id == 0x92 && b0->unk0 == 0xA4) {
-			psndBGMOff_f_d(0x400, 750, 1);
-		}
-	}
-	if (evtGetValue(NULL, GSW(0)) >= 127 && evtGetValue(NULL, GSW(0)) < 178) {
-		PaperSoundBGM* b0;
-		if (id == 0x8C) {
-			return FALSE;
-		}
-		b0 = psbgm;
-		if ((id == 0x90 || id == 0x91) && b0->unk0 == 0xC3) {
-			return FALSE;
-		}
-		if (id == 0 && b0->unk0 == 0xC3 && !(flags & 0x20)) {
-			return FALSE;
-		}
-		if (id == 0x92 && b0->unk0 == 0xC3) {
-			psndBGMOff_f_d(0x400, 750, 1);
-		}
-	}
-	if (evtGetValue(NULL, GSW(0)) >= 164 && id == 0x53) {
-		id = 0x54;
-	}
-	if (id == 0x90 || id == 0x91) {
-		old = psbgm[1].unk0;
-		if (old == 0x80 || (old - 0x81) <= 0xB || old == 0x8E || old == 0x8D) {
-			return FALSE;
-		}
-	}
-	entry = &psbgmlist[id];
-	bgm = &psbgm[idx];
-	fade = &bgm->fade;
-	if (entry->flags == 0 && !(flags & 0x20)) {
-		return FALSE;
-	}
-	SoundSetFadeTime(fadetime, fadetime);
-	old = bgm->unk0;
-	if (old != 0xFFFFFFFF) {
-		u32 f10 = flags & 0x10;
-		if (!f10) {
-			if (flags & 0x20) {
-				if (psbgmlist[old].flags & 0x80000000) {
-					SoundSSContinueCh(bgm->streamId);
-				}
-				else {
-					SoundSongContinueCh(bgm->streamId);
-				}
-				if (flags & 0x100) {
-					fade->state = 1;
-					fade->time = fadetime / 16.666666f;
-					fade->timeMax = 0;
-				}
-				else {
-					fade->state = 0;
-					fade->time = 1;
-					fade->timeMax = 1;
-				}
-				if ((flags & 0x80) && fade->unk6 == 8) {
-					fade->unk6 = 0x10;
-					fade->unk8 = fadetime / 16.666666f;
-					fade->unkA = fade->unk8 * fade->unk7 / 100;
-					if (flags & 0x40) {
-						bgm->unk8 |= 0x40;
-					}
-					else {
-						bgm->unk8 &= ~0x40;
-					}
-				}
-				goto done;
-			}
-			if (old == id) {
-				if (fade->state == 2) {
-				}
-				else {
-					goto done;
-				}
-			}
-			else if (EB[2]) {
-				if (EB[2] == bgm->unkC[1]) {
-					goto done;
-				}
-			}
-		}
-		if (entry->flags & 0x80000000) {
-			if (f10) {
-				SoundSetFadeTime(0, 100);
-				SoundSSFadeoutCh(bgm->streamId);
-			}
-			else {
-				SoundSetFadeTime(0, fadeout);
-				SoundSSFadeoutCh(bgm->streamId);
-			}
-		}
-		else {
-			SoundSetFadeTime(0, fadeout);
-			SoundSongFadeoutCh(bgm->streamId);
-		}
-	}
-	if (id == 0) {
-		return FALSE;
-	}
-	vol = bgm->unkC[2] = EB[0];
-	bgm->unk0 = id;
-	pan = EB[1];
-	bgm->unk8 = flags;
-	bgm->unkC[1] = EB[2];
-	bgm->unkC[3] = pan;
-	if (EB[3] == 1) {
-		bgm->unk10 = 0xFF;
-	}
-	else {
-		bgm->unk10 = 0;
-	}
-	bgm->unk30 = gp->renderTime;
-	if (entry->flags & 0x80000000) {
-		for (ch = 0; ch < 3; ch++) {
-			if (!((u32(*)(s32))SoundSSCheck)(ch)) {
-				sid = ch;
-				goto found;
-			}
-		}
-		for (ch = 0; ch < 3; ch++) {
-			if (SoundSSCheck(ch) & 0x20) {
-				SoundSSStopCh(ch);
-			}
-		}
-		for (ch = 0; ch < 3; ch++) {
-			if (!((u32(*)(s32))SoundSSCheck)(ch)) {
-				sid = ch;
-				goto found;
-			}
-		}
-		sid = -1;
-found:
-		bgm->streamId = sid;
-		if ((u32)bgm->streamId == 0xFFFFFFFF) {
-			goto fail;
-		}
-		SoundSSPlayCh(bgm->streamId, (s32)entry->path);
-		SoundSSMuteOn(bgm->streamId);
-		SoundSSSetVolCh(bgm->streamId, vol);
-		SoundSSSetPanCh(bgm->streamId, pan);
-		if (pan == 0x40) {
-			SoundSSSetSrndPanCh(bgm->streamId, 0x40);
-		}
-		else {
-			SoundSSSetSrndPanCh(bgm->streamId, 0);
-		}
-	}
-	else {
-		for (ch = 0; ch < 4; ch++) {
-			if (!((u32(*)(s32))SoundSongCheck)(ch)) {
-				sid = ch;
-				goto found3;
-			}
-		}
-		sid = -1;
-found3:
-		bgm->streamId = sid;
+    if (i >= 0x106)
+    {
+      i = 0;
+    }
+  }
+  idx = flags & 0xF;
+  id = i;
+  fade = &psbgm[flags & 0xF].fade;
+  if ((evtGetValue((void *) 0, 0 - (170 * 1000000)) >= 101) && ((evtGetValue((void *) 0, 0 - (170 * 1000000)) < 102) || (evtGetValue((void *) 0, 0 - (170 * 1000000)) >= 106)))
+  {
+    if (strcmp(gp->currentMapName, "mri_00") && (i == 0x4F))
+    {
+      id = 0x50;
+    }
+  }
+  if ((evtGetValue((void *) 0, 0 - (170 * 1000000)) >= 257) && (evtGetValue((void *) 0, 0 - (170 * 1000000)) < 260))
+  {
+    if ((id == 0x5A) || (id == 0x5B))
+    {
+      id = 0xA4;
+    }
+  }
+  if ((evtGetValue((void *) 0, 0 - (170 * 1000000)) >= 109) && (evtGetValue((void *) 0, 0 - (170 * 1000000)) < 111))
+  {
+    PaperSoundBGM *b0;
+    if (id == 0x4F)
+    {
+      id = 0xA4;
+    }
+    if (id == 0x50)
+    {
+      id = 0xA4;
+    }
+    if (id == 0x7B)
+    {
+      return 0;
+    }
+    if (id == 0x7D)
+    {
+      return 0;
+    }
+    if (id == 0x7E)
+    {
+      return 0;
+    }
+    if (((idx == 0) && (flags & 0x20)) && (fade->state != 4))
+    {
+      return 0;
+    }
+    b0 = psbgm;
+    if (((id == 0x90) || (id == 0x91)) && (b0->unk0 == 0xA4))
+    {
+      return 0;
+    }
+    if ((id == 0x92) && (b0->unk0 == 0xA4))
+    {
+      psndBGMOff_f_d(0x400, 750, 1);
+    }
+  }
+  if ((evtGetValue((void *) 0, 0 - (170 * 1000000)) >= 127) && (evtGetValue((void *) 0, 0 - (170 * 1000000)) < 178))
+  {
+    PaperSoundBGM *b0;
+    if (id == 0x8C)
+    {
+      return 0;
+    }
+    b0 = psbgm;
+    if (((id == 0x90) || (id == 0x91)) && (b0->unk0 == 0xC3))
+    {
+      return 0;
+    }
+    if (((id == 0) && (b0->unk0 == 0xC3)) && (!(flags & 0x20)))
+    {
+      return 0;
+    }
+    if ((id == 0x92) && (b0->unk0 == 0xC3))
+    {
+      psndBGMOff_f_d(0x400, 750, 1);
+    }
+  }
+  if ((evtGetValue((void *) 0, 0 - (170 * 1000000)) >= 164) && (id == 0x53))
+  {
+    id = 0x54;
+  }
+  if ((id == 0x90) || (id == 0x91))
+  {
+    old = psbgm[1].unk0;
+    if ((((old == 0x80) || ((old - 0x81) <= 0xB)) || (old == 0x8E)) || (old == 0x8D))
+    {
+      return 0;
+    }
+  }
+  entry = &psbgmlist[id];
+  bgm = &psbgm[idx];
+  fade = &bgm->fade;
+  if ((entry->flags == 0) && (!(flags & 0x20)))
+  {
+    return 0;
+  }
+  SoundSetFadeTime(fadetime, fadetime);
+  old = bgm->unk0;
+  if (old != 0xFFFFFFFF)
+  {
+    u32 f10 = flags & 0x10;
+    if (!f10)
+    {
+      if (flags & 0x20)
+      {
+        if (psbgmlist[old].flags & 0x80000000)
+        {
+          SoundSSContinueCh(bgm->streamId);
+        }
+        else
+        {
+          SoundSongContinueCh(bgm->streamId);
+        }
+        if (flags & 0x100)
+        {
+          fade->state = 1;
+          fade->time = fadetime / 16.666666f;
+          fade->timeMax = 0;
+        }
+        else
+        {
+          fade->state = 0;
+          fade->time = 1;
+          fade->timeMax = 1;
+        }
+        if ((flags & 0x80) && (fade->unk6 == 8))
+        {
+          fade->unk6 = 0x10;
+          fade->unk8 = fadetime / 16.666666f;
+          fade->unkA = (fade->unk8 * fade->unk7) / 100;
+          if (flags & 0x40)
+          {
+            bgm->unk8 |= 0x40;
+          }
+          else
+          {
+            bgm->unk8 &= ~0x40;
+          }
+        }
+        goto done;
+      }
+      if (old == id)
+      {
+        if (fade->state == 2)
+        {
+        }
+        else
+        {
+          goto done;
+        }
+      }
+      else
+        if (((u8 *) (&entry->unkC))[2])
+      {
+        if (((u8 *) (&entry->unkC))[2] == bgm->unkC[1])
+        {
+          goto done;
+        }
+      }
+    }
+    if (entry->flags & 0x80000000)
+    {
+      if (f10)
+      {
+        SoundSetFadeTime(0, 100);
+        SoundSSFadeoutCh(bgm->streamId);
+      }
+      else
+      {
+        SoundSetFadeTime(0, fadeout);
+        SoundSSFadeoutCh(bgm->streamId);
+      }
+    }
+    else
+    {
+      SoundSetFadeTime(0, fadeout);
+      SoundSongFadeoutCh(bgm->streamId);
+    }
+  }
+  if (id == 0)
+  {
+    return 0;
+  }
+  vol = (bgm->unkC[2] = ((u8 *) (&entry->unkC))[0]);
+  bgm->unk0 = id;
+  pan = ((u8 *) (&entry->unkC))[1];
+  bgm->unk8 = flags;
+  bgm->unkC[1] = ((u8 *) (&entry->unkC))[2];
+  bgm->unkC[3] = pan;
+  if (((u8 *) (&entry->unkC))[3] == 1)
+  {
+    bgm->unk10 = 0xFF;
+  }
+  else
+  {
+    bgm->unk10 = 0;
+  }
+  bgm->unk30 = gp->renderTime;
+  if (entry->flags & 0x80000000)
+  {
+    for (ch = 0; ch < 3; ch++)
+    {
+      if (!((u32 (*)(s32)) SoundSSCheck)(ch))
+      {
+        i = ch;
+        goto found;
+      }
+    }
 
-		if ((u32)bgm->streamId == 0xFFFFFFFF) {
-			goto fail;
-		}
-		SoundSongPlayCh(bgm->streamId, entry->flags & 0xFFFFFFF);
-		SoundSongSetVolCh(bgm->streamId, vol);
-	}
-	if (flags & 0x100) {
-		fade->state = 1;
-		fade->time = fadetime / 16.666666f;
-		fade->timeMax = 0;
-		fade->unk6 = 0;
-		fade->unk8 = 1;
-		fade->unkA = 1;
-	}
-	else {
-		fade->state = 0;
-		fade->time = 1;
-		fade->timeMax = 1;
-		fade->unk6 = 0;
-		fade->unk8 = 1;
-		fade->unkA = 1;
-	}
-	goto done;
-fail:
-	bgm->unk0 = -1;
-	return FALSE;
-done:
-	psndBGMMain();
-	return TRUE;
+    for (ch = 0; ch < 3; ch++)
+    {
+      if (SoundSSCheck(ch) & 0x20)
+      {
+        SoundSSStopCh(ch);
+      }
+    }
+
+    for (ch = 0; ch < 3; ch++)
+    {
+      if (!((u32 (*)(s32)) SoundSSCheck)(ch))
+      {
+        i = ch;
+        goto found;
+      }
+    }
+
+    i = -1;
+    found:
+    bgm->streamId = i;
+
+    if (((u32) bgm->streamId) == 0xFFFFFFFF)
+    {
+      goto fail;
+    }
+    SoundSSPlayCh(bgm->streamId, (s32) entry->path);
+    SoundSSMuteOn(bgm->streamId);
+    SoundSSSetVolCh(bgm->streamId, vol);
+    SoundSSSetPanCh(bgm->streamId, pan);
+    if (pan == 0x40)
+    {
+      SoundSSSetSrndPanCh(bgm->streamId, 0x40);
+    }
+    else
+    {
+      SoundSSSetSrndPanCh(bgm->streamId, 0);
+    }
+  }
+  else
+  {
+    for (ch = 0; ch < 4; ch++)
+    {
+      if (!((u32 (*)(s32)) SoundSongCheck)(ch))
+      {
+        i = ch;
+        goto found3;
+      }
+    }
+
+    i = -1;
+    found3:
+    bgm->streamId = i;
+
+    if (((u32) bgm->streamId) == 0xFFFFFFFF)
+    {
+      goto fail;
+    }
+    SoundSongPlayCh(bgm->streamId, entry->flags & 0xFFFFFFF);
+    SoundSongSetVolCh(bgm->streamId, vol);
+  }
+  if (flags & 0x100)
+  {
+    fade->state = 1;
+    fade->time = fadetime / 16.666666f;
+    fade->timeMax = 0;
+    fade->unk6 = 0;
+    fade->unk8 = 1;
+    fade->unkA = 1;
+  }
+  else
+  {
+    fade->state = 0;
+    fade->time = 1;
+    fade->timeMax = 1;
+    fade->unk6 = 0;
+    fade->unk8 = 1;
+    fade->unkA = 1;
+  }
+  goto done;
+  fail:
+  bgm->unk0 = -1;
+
+  return 0;
+  done:
+  psndBGMMain();
+
+  return 1;
 }
 #pragma dont_inline reset
 
@@ -6211,114 +6285,142 @@ typedef struct PSSFXFull {
 } PSSFXFull;
 typedef struct { u8 pad[0x12]; s16 f12; } SFXEntS;
 
-s32 __psndSFXOn(const char* name, u8 vol, u8 pan, u16 pitch, Vec* pos, u32 r8, u16 dist, s32 r10) {
-	PSSFXFull* sfx = NULL;
-	PSSFXFull* s;
-	SoundEffectEntry* entry;
-	s32 id;
-	s32 sid;
-	s32 idx = 0;
-	s32 i;
-	s32 delay;
+s32 __psndSFXOn(const char *name, u8 vol, u8 pan, u16 pitch, Vec *pos, u32 r8, u16 dist, s32 r10)
+{
+  PSSFXFull *sfx = (void *) 0;
+  PSSFXFull *s;
+  SoundEffectEntry *entry;
+  s32 id;
+  s32 sid;
+  s32 idx = 0;
+  s32 i;
+  s32 delay;
+  id = searchPSSFXList(name);
+  sid = id & 0x1FFF;
+  entry = &pssfxlist[sid];
+  if (entry->field_0x4 == 0)
+  {
+    return -1;
+  }
+  if ((psnd.unk56 & 4) && (r10 == 0))
+  {
+    return -1;
+  }
+  if ((((sid == 0x5B) || (sid == 0x8CA)) || (((u32) (sid - 0x1BE)) <= 1)) || (sid == 0x205))
+  {
+    if (psnd.unk5C)
+    {
+      return -1;
+    }
+    psnd.unk5C = 6;
+  }
+  if ((evtGetValue((void *) 0, 0 - (170 * 1000000)) <= 2) && (sid == 0x365))
+  {
+    return -1;
+  }
+  s = (PSSFXFull *) pssfx;
+  delay = 0;
+  for (i = 0; i < 40; i++)
+  {
+    PSSFXFull *t = s + i;
+    if ((((((u32) t->unk0) != 0xFFFFFFFF) && (((u32) (t->unk0 & 0x1FFF)) == ((u32) sid))) && (t->unk6 & 0x100)) && (delay == 0))
+    {
+      delay = (*((u16 *) (&psnd.unk54)) += 8);
+    }
+    if (((u32) t->unk0) == 0xFFFFFFFF)
+    {
+      sfx = t;
+      idx = i;
+    }
+  }
 
-	id = searchPSSFXList(name);
-	sid = id & 0x1FFF;
-	entry = &pssfxlist[sid];
-	if (entry->field_0x4 == 0) {
-		return -1;
-	}
-	if ((psnd.unk56 & 4) && r10 == 0) {
-		return -1;
-	}
-	if (sid == 0x5B || sid == 0x8CA || (u32)(sid - 0x1BE) <= 1 || sid == 0x205) {
-		if (psnd.unk5C) {
-			return -1;
-		}
-		psnd.unk5C = 6;
-	}
-	if (evtGetValue(NULL, GSW(0)) <= 2 && sid == 0x365) {
-		return -1;
-	}
-	s = (PSSFXFull*)pssfx;
-	delay = 0;
-	for (i = 0; i < 40; i++) {
-		PSSFXFull* t = s + i;
-		if ((u32)t->unk0 != 0xFFFFFFFF && (u32)(t->unk0 & 0x1FFF) == (u32)sid && (t->unk6 & 0x100) && delay == 0) {
-			delay = *(u16*)&psnd.unk54 += 8;
-		}
-		if ((u32)t->unk0 == 0xFFFFFFFF) {
-			sfx = t;
-			idx = i;
-		}
-	}
-	if (sfx == NULL) {
-		for (i = 0; i < 40; i++, s++) {
-			if ((u32)s->unk0 == 0xFFFFFFFF) {
-				sfx = s;
-				idx = i;
-				break;
-			}
-			if (s->unkC > entry->field_0x10) {
-				psndSFXOff(i);
-				sfx = s;
-				idx = i;
-				break;
-			}
-		}
-		if (sfx == NULL) {
-			return -1;
-		}
-	}
-	if (vol == 0xFF) {
-		vol = 0x7F;
-	}
-	if (pan == 0xFF) {
-		pan = entry->field_0xD;
-	}
-	sfx->unk6 = 0x101;
-	if (psnd.unk56 & 0x10) {
-		sfx->unk6 |= 0x10;
-	}
-	if (id & 0x4000000) {
-		sfx->unk6 |= 0x20;
-	}
-	if (sid == 0x518 || sid == 0x742) {
-		sfx->unk6 |= 0x280;
-	}
-	if (entry->field_0xE == 1) {
-		sfx->unk6 |= 0x200;
-	}
-	if (id & 0x10000) {
-		sfx->unk6 |= 0x400;
-	}
-	if (id & 0x20000) {
-		sfx->unk6 |= 0x800;
-	}
-	if (id & 0x40000) {
-		sfx->unk6 |= 0x80;
-	}
-	sfx->unk0 = id;
-	sfx->unk8 = vol;
-	sfx->unk9 = entry->field_0xC;
-	sfx->unkA = pan;
-	sfx->unkE = entry->field_0x11 + (pitch / 16.666666f + delay);
-	sfx->unk10 = delay * 5;
-	sfx->unkB = entry->field_0xF;
-	sfx->unkC = entry->field_0x10;
-	sfx->unk14 = ((SFXEntS*)entry)->f12;
-	if (pos != NULL) {
-		sfx->unk1C = *pos;
-		if (r8 == 0) {
-			sfx->unk6 |= 2;
-		} else {
-			sfx->unk6 |= 4;
-		}
-	}
-	sfx->unk12 = dist;
-	sfx->unk16 = 0x7D00;
-	sfx->unk4 = ++*(u16*)&psnd.unk50;
-	idx |= *(u16*)&psnd.unk50 << 8;
-	return idx;
+  if (sfx == ((void *) 0))
+  {
+    for (i = 0; i < 40; i++, s++)
+    {
+      if (((u32) s->unk0) == 0xFFFFFFFF)
+      {
+        sfx = s;
+        idx = i;
+        break;
+      }
+      if (s->unkC > entry->field_0x10)
+      {
+        psndSFXOff(i);
+        sfx = s;
+        idx = i;
+        break;
+      }
+    }
+
+    if (sfx == ((void *) 0))
+    {
+      return -1;
+    }
+  }
+  if (vol == 0xFF)
+  {
+    vol = 0x7F;
+  }
+  if (pan == 0xFF)
+  {
+    pan = entry->field_0xD;
+  }
+  sfx->unk6 = 0x101;
+  if (psnd.unk56 & 0x10)
+  {
+    sfx->unk6 |= 0x10;
+  }
+  if (id & 0x4000000)
+  {
+    sfx->unk6 |= 0x20;
+  }
+  if ((sid == 0x518) || (sid == 0x742))
+  {
+    sfx->unk6 |= 0x280;
+  }
+  if (entry->field_0xE == 1)
+  {
+    sfx->unk6 |= 0x200;
+  }
+  if (id & 0x10000)
+  {
+    sfx->unk6 |= 0x400;
+  }
+  if (id & 0x20000)
+  {
+    sfx->unk6 |= 0x800;
+  }
+  if (id & 0x40000)
+  {
+    sfx->unk6 |= 0x80;
+  }
+  sfx->unk0 = id;
+  sfx->unk8 = vol;
+  sfx->unk9 = entry->field_0xC;
+  sfx->unkA = pan;
+  sfx->unkE = entry->field_0x11 + ((pitch / 16.666666f) + delay);
+  sfx->unk10 = delay * 5;
+  sfx->unkB = entry->field_0xF;
+  sfx->unkC = entry->field_0x10;
+  sfx->unk14 = ((SFXEntS *) entry)->f12;
+  if (pos != ((void *) 0))
+  {
+    sfx->unk1C = *pos;
+    if (r8 == 0)
+    {
+      sfx->unk6 |= 2;
+    }
+    else
+    {
+      sfx->unk6 |= 4;
+    }
+  }
+  sfx->unk12 = dist;
+  sfx->unk16 = 0x7D00;
+  sfx->unk4 = ++(*((u16 *) (&psnd.unk50)));
+  idx |= (*((u16 *) (&psnd.unk50))) << 8;
+  return idx;
 }
 
 #pragma dont_inline reset

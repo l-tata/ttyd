@@ -112,7 +112,7 @@ static inline NanNPC* nanNPCSearch(char* name) {
 void nanNPCOption(void) {
     s32 clear;
     NanNPC* q;
-    NanNPCWork* w;
+    void* w;
     NanNPC* p;
     NanNPC* r;
     Vec diff;
@@ -131,9 +131,9 @@ void nanNPCOption(void) {
     f32 nz, ny, nx, hz, hy, hx;
 
     w = nanNPCWork;
-    for (p = w->npc; p < w->npc + w->num; p++) {
+    for (p = ((NanNPCWork*)w)->npc; p < ((NanNPCWork*)w)->npc + ((NanNPCWork*)w)->num; p++) {
         if (p->flags & 4) {
-            for (q = w->npc; q < w->npc + w->num; q++) {
+            for (q = ((NanNPCWork*)w)->npc; q < ((NanNPCWork*)w)->npc + ((NanNPCWork*)w)->num; q++) {
                 if (p != q && (q->flags & 4)) {
                     dist = PSVECDistance(&p->pos, &q->pos);
                     PSVECSubtract(&p->pos, &q->pos, &diff);
@@ -152,7 +152,7 @@ void nanNPCOption(void) {
             }
         }
     }
-    for (p = w->npc; p < w->npc + w->num; p++) {
+    for (p = ((NanNPCWork*)w)->npc; p < ((NanNPCWork*)w)->npc + ((NanNPCWork*)w)->num; p++) {
         if (p->flags & 4) {
             PSVECSubtract(&p->field_30, &p->pos, &diff);
             mag = PSVECMag(&diff);
@@ -164,7 +164,7 @@ void nanNPCOption(void) {
             }
         }
     }
-    for (r = w->npc; r < w->npc + w->num; r++) {
+    for (r = ((NanNPCWork*)w)->npc; r < ((NanNPCWork*)w)->npc + ((NanNPCWork*)w)->num; r++) {
         if (r->flags & 4) {
             mag = PSVECMag(&r->move);
             if (mag) {
@@ -641,6 +641,7 @@ USER_FUNC(evt_nannpc_jump_position) {
     f32 height = evtGetValue(event, args[5]);
     s32 elapsed;
     s32 el;
+    u32 uel;
     f32 t;
     if (isFirstCall) {
         npc->startTime = gp->renderTime;
@@ -651,11 +652,12 @@ USER_FUNC(evt_nannpc_jump_position) {
         event->userdataf[2] = y - (f32)npc->ipos[1] - event->userdataf[1];
     }
     el = ((u32)gp->renderTime - (u32)npc->startTime) / (OS_TIMER_CLOCK / 1000);
+    uel = el;
     if (el < duration) {
-        elapsed = el;
+        elapsed = uel;
         t = (f32)elapsed / (f32)duration;
         npc->pos.x = intplGetValue(0, elapsed, duration, npc->ipos[0], x);
-        npc->pos.z = intplGetValue(0, el, duration, npc->ipos[2], z);
+        npc->pos.z = intplGetValue(0, uel, duration, npc->ipos[2], z);
         npc->pos.y = t * (event->userdataf[1] * t + event->userdataf[2]) + (f32)npc->ipos[1];
         return 0;
     }

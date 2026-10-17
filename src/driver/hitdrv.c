@@ -175,7 +175,8 @@ HitEntry* _hitEnt(MapFileJoint* joint, HitEntry* parent, Mtx parentMtx, s32 mapI
                 }
             } else {
                 for (k = 0; k < mesh->displayListCount; k++) {
-                    numVectors += *(u16*)((u8*)mesh->displayLists.packedLists[k].offset + 1) - 2;
+                    j = *(u16*)((u8*)mesh->displayLists.packedLists[k].offset + 1);
+                    numVectors += j - 2;
                 }
             }
         }
@@ -571,7 +572,7 @@ s32 hitCalcVtxPosition(HitEntry* hit) {
                     s16* base;
                     register u32 gqr;
                     HitVector* v2;
-                    i0 = *(u16*)&list[j * stride + 3];
+                    i0 = *(u16*)(list + j * stride + 3);
                     even = !(j & 1);
                     i1 = *(u16*)&list[stride * (j + 1) + 3];
                     i2 = *(u16*)&list[stride * (j + 2) + 3];
@@ -1080,30 +1081,30 @@ HitEntry* hitCheckAttr(s32 user0, f32* hitX, f32* hitY, f32* hitZ, f32* distance
 
 HitEntry* hitCheckSphereFilter(HitFilterCallback callback, f32 x, f32 y, f32 z,
                                f32 distance) { // almost 1:1, stubborn regalloc
-    MapWork* wp = mapGetWork();
-    MapEntry* var_r31 = wp->entries;
-    MapEntry* map;
+    MapEntry* map = mapGetWork()->entries;
+    MapEntry* var_r31 = map;
+    int i;
     Vec sp68;
     int j;
-    HitEntry* temp_r27;
     HitEntry* var_r23;
     HitVector* vector;
     f32 var_f28;
+    s32 objectId;
+    s32 fl;
     f32 temp_f1;
     f32 var_f30;
     f32 var_f31;
     s32 entryId;
-    s32 objectId;
     s32 var_r29;
     HitCheckQuery temp;
     HitCheckQuery* query;
-    int i;
+    HitEntry* temp_r27;
 
     var_f28 = -1.0f;
     objectId = -1;
     query = &temp;
     sp68 = (Vec){ x, y, z };
-    for (i = 0; i < wp->entries->count; var_r31++, i++) {
+    for (i = 0; i < map->count; var_r31++, i++) {
         var_r23 = var_r31->hitEntries;
         for (j = 0; j < var_r31->hitNumJoints; j++, var_r23++) {
             if ((var_r23->attributes & 0x80000000) && (var_r23->joint->partCount != 0)) {
@@ -1128,14 +1129,14 @@ HitEntry* hitCheckSphereFilter(HitFilterCallback callback, f32 x, f32 y, f32 z,
         return 0;
     }
     if (var_f28 < (0.5f * var_f31)) {
-        return &wp->entries[entryId].hitEntries[objectId];
+        return &map[entryId].hitEntries[objectId];
     }
-    map = &wp->entries[entryId];
+    map = &map[entryId];
     temp_r27 = &map->hitEntries[objectId];
     PSVECSubtract(&temp_r27->centerWorld, &sp68, &query->targetDir);
     PSVECNormalize(&query->targetDir, &query->targetDir);
     var_f30 = -1.0f;
-    var_r29 = -1;
+    fl = -1;
     query->targetPos = sp68;
     query->targetDistance = distance;
     if (temp_r27->joint->drawMode->cullMode == 1) {
@@ -1145,18 +1146,17 @@ HitEntry* hitCheckSphereFilter(HitFilterCallback callback, f32 x, f32 y, f32 z,
     }
     vector = temp_r27->vectors;
     for (i = 0; i < temp_r27->unkA8; i++, vector++) {
-        entryId = query->singleSided;
-        if ((entryId == 0) || !(PSVECDotProduct(&vector->normal, &query->targetDir) >= 0.0f)) {
+        if ((query->singleSided == 0) || !(PSVECDotProduct(&vector->normal, &query->targetDir) >= 0.0f)) {
             if (tempfunc3(query, vector) && ((var_f30 < 0.0f) || (var_f30 > query->targetDistance))) {
                 var_f30 = query->targetDistance;
-                var_r29 = 1;
+                fl = 1;
             }
         }
     }
     if (var_f30 > distance) {
         return 0;
     }
-    if (var_r29 < 0) {
+    if (fl < 0) {
         return 0;
     }
     return &map->hitEntries[objectId];
@@ -1174,10 +1174,8 @@ HitEntry* hitNameToPtr(const char* name) { // 1:1
     if (name == NULL) {
         return NULL;
     }
-    map = wp->entries;
-    new_var = map;
-    new_var2 = new_var;
-    for (i = 0; i < new_var2->count; map++, i++) {
+    for (i = 0; i < wp->entries->count; i++) {
+        map = &wp->entries[i];
         hit = map->hitEntries;
         for (j = 0; j < map->hitNumJoints; j++, hit++) {
             if (!(hit->flags & 0x80) && !strcmp(hit->joint->name, name)) {

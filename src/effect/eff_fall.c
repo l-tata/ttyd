@@ -326,12 +326,11 @@ EffectEntry* effFallEntry(s32 type, f32 x, f32 y, f32 z, f32 arg4, f32 arg5, f32
 
 void effFallMain(EffectEntry* effect) {
     Vec sndPos;
-    const char* bug2; EffFallElem* e4;
+    const char* bug[2]; EffFallElem* e4;
     const char* fork1;
     s32 i;
     const char* meteor1; f32 y2; EffFallElem* e3;
     const char* light1;
-    const char* bug1;
 
     EffFallElem* e; EffFallElem* e2;
     const char* koopa1;
@@ -379,8 +378,8 @@ void effFallMain(EffectEntry* effect) {
         effDelete(effect);
         return;
     }
-    bug1 = "SFX_BTL_STAGE_FALL_BUG1";
-    bug2 = "SFX_BTL_STAGE_FALL_BUG2";
+    bug[1] = "SFX_BTL_STAGE_FALL_BUG1";
+    bug[0] = "SFX_BTL_STAGE_FALL_BUG2";
     fork1 = "SFX_BTL_STAGE_DAMAGE_FORK1\0";
     koopa1 = "SFX_BTL_STAGE_FALL_KOOPA1\0\0";
     meteor1 = "SFX_BTL_STAGE_FALL_METEOR1\0";
@@ -403,15 +402,15 @@ void effFallMain(EffectEntry* effect) {
                         if (e3->timer == 0) {
                             e3->state++;
                             if (type == 1) {
-                                psndSFXOn_3D(bug1, &sndPos);
+                                psndSFXOn_3D(bug[1], &sndPos);
                             } else if (i == 1) {
-                                psndSFXOn_3D(bug2, &sndPos);
+                                psndSFXOn_3D(bug[0], &sndPos);
                             }
                         }
                         break;
                     case 1:
                         if (type == 0 && i > 1 && !played && gp->retraceCount % 6 == 0) {
-                            psndSFXOn_3D(bug2, &sndPos);
+                            psndSFXOn_3D(bug[0], &sndPos);
                             played = 1;
                         }
                         e3->pos.y += e->f34;

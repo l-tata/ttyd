@@ -96,10 +96,11 @@ void memInit(void) { //almost 1:1, stubborn regalloc at the end
 void* __memAlloc(HEAP_TYPE heap, u32 size);
 
 void memClear(HEAP_TYPE heap) {
-	u32 size;
 	MapAllocEntry* entry;
+	u32 size;
 
-	OSDestroyHeap(heapHandle[heap]);
+	size = (u32)heapHandle[heap];
+	OSDestroyHeap((OSHeapHandle)size);
 	OSCreateHeap(heapStart[heap], heapEnd[heap]);
 	if (heap == HEAP_MALLOC) {
 		size = (u32)heapEnd[1] - (u32)heapStart[1] - 0x20;

@@ -1,3 +1,4 @@
+#pragma defer_codegen on
 #include "dolphin/types.h"
 #include "driver/hitdrv.h"
 #include "mario/mario.h"
@@ -227,7 +228,7 @@ static inline s32 makeVec(f32 half) {
     }
 
 void roll_upstairs(void);
-static void marioRollCan(void);
+static inline void marioRollCan(void);
 
 
 #pragma inline_max_size(20000)
@@ -1146,7 +1147,7 @@ void mot_fall_roll(void) {
     }
 }
 
-static void marioRollCan(void) {
+static inline void marioRollCan(void) {
     MarioWork* mario = marioGetPtr();
     f32 v26;
     {

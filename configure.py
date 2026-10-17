@@ -444,7 +444,7 @@ config.libs = [
             Object(Matching, "driver/icondrv.c"),
             Object(Matching, "driver/lightdrv.c"),
             Object(NonMatching, "driver/mapdrv.c"),
-            Object(NonMatching, "driver/shadowdrv.c"),
+            Object(Matching, "driver/shadowdrv.c"),
             Object(Matching, "driver/seqdrv.c"),
             Object(NonMatching, "driver/animdrv.c"),
             Object(NonMatching, "driver/npcdrv.c"),
@@ -838,7 +838,7 @@ config.libs = [
         "progress_category": "game",
         "objects": [
             Object(NonMatching, "window/win_root.c"),
-            Object(NonMatching, "window/win_party.c"),
+            Object(Matching, "window/win_party.c"),
             Object(Matching, "window/win_badge.c"),
             Object(Matching, "window/win_item.c"),
             Object(NonMatching, "window/win_mario.c"),

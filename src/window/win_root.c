@@ -307,10 +307,10 @@ s32 winRootMain(WinRootWork* w) {
     static char* msg_help[] = {
         "msg_menu_mario", "msg_menu_nakama", "msg_menu_mochimono", "msg_menu_badge", "msg_menu_kiroku",
     };
+    s32 x;
     s32 i;
     s32 ret;
     WinRootWork* t;
-    s32 x;
 
     switch (w->active) {
     case 0:
@@ -526,12 +526,12 @@ s32 winRootMain(WinRootWork* w) {
         break;
     }
 
-    for (i = 0, t = w, x = -205; i < 5; i++, t = (WinRootWork*)((u8*)t + sizeof(WinRootTab)), x += 105) {
+    for (x = -205, t = w, i = 0; i < 5; t = (WinRootWork*)((u8*)t + sizeof(WinRootTab)), x += 105, i++) {
         switch (t->tab[0].state) {
         case 0:
             t->tab[0].x = x;
             t->tab[0].y = 300.0f;
-            t->tab[0].timer = i * 4;
+            t->tab[0].timer = i << 2;
             t->tab[0].state++;
             break;
         case 1:
@@ -591,6 +591,11 @@ s32 winRootMain(WinRootWork* w) {
     w->sortPosY += (w->sortTgtY - w->sortPosY) / 4.0f;
     dispEntry(CAMERA_2D, 1000.0f, 0, (DispCallback)unk_8014d338, w);
     return 0;
+}
+
+void winRootStrippedPool(f32* f) {
+    f[0] = 185.0f;
+    f[1] = 1000.0f;
 }
 
 static inline void winTabDisp(WinPauseWork* wp);

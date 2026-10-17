@@ -891,7 +891,6 @@ void party_motion_homing_walk(PartyEntry* party) {
     f32 a;
     f32 gy;
     f32 md;
-    f32 hh;
     Vec v;
     Vec t;
     Vec tp;
@@ -899,14 +898,16 @@ void party_motion_homing_walk(PartyEntry* party) {
     Vec p2;
     Vec p3;
     Vec u;
-    f32 dir, sp;
+    f32 sp;
+    f32 dir;
+    f32 s4;
     f32 c4;
     f32 rx, ry, rz;
-    f32 s4;
     f32 fsy, fsa, fsb;
     f32 c, s;
     f32 s2, c2;
     f32 c3, s3;
+    f32 hh;
     HitCheckQuery q;
     HitCheckQuery q2;
     HitCheckQuery q3;
@@ -1084,8 +1085,7 @@ found:
                 partyChgPoseId(party, 1);
             }
         }
-        i = partyGetFootmarkWriteId(id);
-        if (partyGetFootmarkReadId(id) == i) {
+        if (partyGetFootmarkReadId(id) == (i = partyGetFootmarkWriteId(id))) {
             unk_800c93d0(party, party->playerPtr->unk180);
             if (party->playerPtr->unk180 == 0.0f || party->unkA0 != 0.0f || party->unkA8 != 0.0f) {
                 dir = party->unk100;
@@ -1139,9 +1139,11 @@ found:
             party->unk94.y = ry;
             gy = partyGetDirGndY(party->unk94, md);
             if (gy > party->position.y) {
-                sincosf(&s4, &c4, dir = partyToMovedir(party, party->unk110));
-                party->unk94.x = s4 * 40.0f;
-                party->unk94.z = c4 * 40.0f;
+                dir = partyToMovedir(party, party->unk110);
+                sincosf(&s4, &c4, dir);
+                { f32 k = 40.0f;
+                party->unk94.x = s4 * k;
+                party->unk94.z = c4 * k; }
                 party->unk94.y = gy;
             }
             partyChgMot(party, 2);
@@ -1236,7 +1238,8 @@ found:
                             }
                         }
                     } else {
-                        getFrontFloor(party, &t, dir = partyGetTargetDir(id, party->position.x, party->position.z));
+                        dir = partyGetTargetDir(id, party->position.x, party->position.z);
+                        getFrontFloor(party, &t, dir);
                         a = t.y - party->position.y;
                         if (a > 100.0f) {
                             party->position = t;
@@ -2984,6 +2987,7 @@ static inline void partyDownDirX(HitCheckQuery* q) {
 }
 
 static f32 partyGetDirGndY(Vec u, f32 md) {
+    f32 k = 40.0f;
     HitCheckQuery q2;
     HitEntry* hit;
     f32 s2, c2;
@@ -2992,9 +2996,9 @@ static f32 partyGetDirGndY(Vec u, f32 md) {
     gy = touch_wall_ct;
     sincosf(&s2, &c2, md);
     q2.targetPos = u;
-    q2.targetPos.x = s2 * 40.0f + q2.targetPos.x;
+    q2.targetPos.x = s2 * k + q2.targetPos.x;
+    q2.targetPos.z = c2 * k + q2.targetPos.z;
     q2.targetPos.y = q2.targetPos.y + gy;
-    q2.targetPos.z = c2 * 40.0f + q2.targetPos.z;
     q2.targetDistance = 1000.0f;
     q2.targetDir = (Vec){0.0f, -1.0f, 0.0f};
     hit = hitCheckVecFilter(&q2, NULL);
@@ -3096,11 +3100,12 @@ static inline u32 partyGetFrontAttrFar(PartyEntry* party) {
     HitCheckQuery q;
     HitEntry* hit;
     f32 s, c;
+    f32 k = 40.0f;
     sincosf(&s, &c, party->unk100);
     q.targetDistance = 100.0f;
-    q.targetPos.x = s * 40.0f + party->position.x;
-    q.targetPos.z = c * 40.0f + party->position.z;
-    q.targetPos.y = party->position.y + 40.0f;
+    q.targetPos.x = s * k + party->position.x;
+    q.targetPos.z = c * k + party->position.z;
+    q.targetPos.y = party->position.y + k;
     q.targetDir = (Vec){0.0f, -1.0f, 0.0f};
     hit = hitCheckVecFilter(&q, NULL);
     return hit ? hitGetAttr(hit) : 0;

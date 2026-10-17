@@ -930,7 +930,7 @@ void btlseqTurn(BattleWork* wp) {
 			TURN_RECOVERY_CASE(wp, 8);
 		case 0x3000020: {
 			BattleUnit* unit;
-			const char* sfxName = (0, "SFX_CONDITION_BREAK_ICE1");
+			void* sfxName = (0, "SFX_CONDITION_BREAK_ICE1");
 			for (i = 0; i < 64; i++) {
 				unit = BattleGetUnitPtr(wp, i);
 				if (BtlUnit_CheckRecoveryStatus(unit, 9)) {
@@ -1863,12 +1863,13 @@ void battleSortPhaseMoveTable(BattleWork* wp, s32 count) {
 	f32 x1, y1, z1;
 	f32 x2, y2, z2;
 	s32 tmp;
+	void* w;
 
+	w = (void*)wp;
 	if (count <= 0) {
-		BattleWork* w = wp; (void)w;
 		count = 0;
 		for (i = 0; i < 64; i++) {
-			if (wp->movePriorityQueue[i] == -1) {
+			if (((BattleWork*)w)->movePriorityQueue[i] == -1) {
 				break;
 			}
 			count = count + 1;
@@ -1876,25 +1877,25 @@ void battleSortPhaseMoveTable(BattleWork* wp, s32 count) {
 	}
 	for (i = 0; i < count - 1; i++) {
 		for (j = 0; j < count - i - 1; j++) {
-			unit1 = BattleGetUnitPtr(wp, wp->movePriorityQueue[j]);
-			unit2 = BattleGetUnitPtr(wp, wp->movePriorityQueue[j + 1]);
+			unit1 = BattleGetUnitPtr(((BattleWork*)w), ((BattleWork*)w)->movePriorityQueue[j]);
+			unit2 = BattleGetUnitPtr(((BattleWork*)w), ((BattleWork*)w)->movePriorityQueue[j + 1]);
 			BtlUnit_GetHomePos(unit1, &x1, &y1, &z1);
 			BtlUnit_GetHomePos(unit2, &x2, &y2, &z2);
 			if (__fabs(x1) > __fabs(x2)) {
-				tmp = wp->movePriorityQueue[j];
-				wp->movePriorityQueue[j] = wp->movePriorityQueue[j + 1];
-				wp->movePriorityQueue[j + 1] = tmp;
+				tmp = ((BattleWork*)w)->movePriorityQueue[j];
+				((BattleWork*)w)->movePriorityQueue[j] = ((BattleWork*)w)->movePriorityQueue[j + 1];
+				((BattleWork*)w)->movePriorityQueue[j + 1] = tmp;
 			}
 		}
 	}
 	for (i = 0; i < count - 1; i++) {
 		for (j = 0; j < count - i - 1; j++) {
-			unit1 = BattleGetUnitPtr(wp, wp->movePriorityQueue[j]);
-			unit2 = BattleGetUnitPtr(wp, wp->movePriorityQueue[j + 1]);
+			unit1 = BattleGetUnitPtr(((BattleWork*)w), ((BattleWork*)w)->movePriorityQueue[j]);
+			unit2 = BattleGetUnitPtr(((BattleWork*)w), ((BattleWork*)w)->movePriorityQueue[j + 1]);
 			if (unit1->movePriority < unit2->movePriority) {
-				tmp = wp->movePriorityQueue[j];
-				wp->movePriorityQueue[j] = wp->movePriorityQueue[j + 1];
-				wp->movePriorityQueue[j + 1] = tmp;
+				tmp = ((BattleWork*)w)->movePriorityQueue[j];
+				((BattleWork*)w)->movePriorityQueue[j] = ((BattleWork*)w)->movePriorityQueue[j + 1];
+				((BattleWork*)w)->movePriorityQueue[j + 1] = tmp;
 			}
 		}
 	}
@@ -1984,10 +1985,11 @@ BOOL BattleWaitAllActiveEvtEnd(BattleWork* wp) {
 }
 
 BOOL BattleWaitAllActiveEvtEnd_NoBgSetEndWait(BattleWork* wp) {
-	int i; BOOL done; BattleUnit* unit;
+	void* w; BattleUnit* unit; BOOL done; int i;
 	done = TRUE;
+	w = (void*)wp;
 	for (i = 0; i < 0x40; i++) {
-		unit = BattleGetUnitPtr(wp, i);
+		unit = BattleGetUnitPtr((BattleWork*)w, i);
 		if (unit) {
 			while (unit->phaseEventId) {
 				if (evtCheckID(unit->phaseEventId)) {
